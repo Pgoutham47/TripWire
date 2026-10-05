@@ -6,6 +6,8 @@ Tripwire is on-device scam protection for Android. It follows each stranger who 
 
 Everything runs on the phone. Your messages never leave it.
 
+**Demo video:** [watch on YouTube](https://youtu.be/3qfL0g0Q4FU)
+
 ## Why
 
 - Indians lost ₹22,495 crore to cyber fraud in 2025, and three of every four rupees were never recovered.
@@ -35,31 +37,38 @@ Tripwire is one Android app with a five-step pipeline on the phone.
 
 ```mermaid
 flowchart LR
-    subgraph IN[Signals in]
-        A1[WhatsApp · Telegram · SMS]
-        A2[Calls]
-        A3[App installs]
-        A4[UPI links]
+    subgraph SIG["Signals in"]
+        A1["WhatsApp, Telegram, SMS"]
+        A2["Calls"]
+        A3["App installs"]
+        A4["UPI links"]
     end
 
-    subgraph PHONE[On the phone · works offline]
+    subgraph PHONE["On the phone, works offline"]
         direction TB
-        B1[1 Collectors<br/>strangers only] --> B2[2 Encrypted ledger<br/>one record per stranger]
-        B2 --> B3[3 Tactic reader<br/>AI model or keyword rules]
-        B3 --> B4[4 Progression engine<br/>family · stage · risk · hard checks]
-        B4 --> B5[5 Intervention broker]
+        B1["1. Collectors<br/>strangers only"] --> B2["2. Encrypted ledger<br/>one record per stranger"]
+        B2 --> B3["3. Tactic reader<br/>AI model or keyword rules"]
+        B3 --> B4["4. Progression engine<br/>family, stage, risk, hard checks"]
+        B4 --> B5["5. Intervention broker"]
     end
 
-    subgraph OUT[Response out]
-        C1[Quiet notice]
-        C2[Full-screen warning, spoken]
-        C3[Guard alerts]
-        C4[Text to a trusted person]
-        C5[Complaint pack PDF]
+    subgraph RESP["Response out"]
+        C1["Quiet notice"]
+        C2["Full-screen warning, spoken"]
+        C3["Guard alerts"]
+        C4["Text to a trusted person"]
+        C5["Complaint pack PDF"]
     end
 
-    IN --> B1
-    B5 --> OUT
+    A1 --> B1
+    A2 --> B1
+    A3 --> B1
+    A4 --> B1
+    B5 --> C1
+    B5 --> C2
+    B5 --> C3
+    B5 --> C4
+    B5 --> C5
 ```
 
 ### The six stages
