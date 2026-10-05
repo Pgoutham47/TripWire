@@ -242,6 +242,23 @@ class ComponentTest {
     }
 
     @Test
+    fun `an install with no readable app name is on the timeline without an empty name`() {
+        val explain = ExplanationBuilder(pack)
+        fun event(id: Long, type: EventType, label: String? = null, pkg: String? = null) =
+            Event(id, "c", "com.google.android.packageinstaller", type, null, Entities(), id * 1000, "test", installedLabel = label, installedPackage = pkg)
+        val labels = explain.timeline(
+            listOf(
+                event(1, EventType.INSTALL_SCREEN_OPENED),
+                event(2, EventType.APP_INSTALLED, label = " "),
+                event(3, EventType.APP_INSTALLED, label = "SATFIN Pro"),
+            ),
+            emptyMap(),
+            "en",
+        ).map { it.label }
+        assertEquals(listOf("Started installing an app from a link", "Installed an app from a link", "Installed SATFIN Pro from a link"), labels)
+    }
+
+    @Test
     fun `every signal referenced by a stage or rule has a weight`() {
         for (f in pack.families) {
             val referenced = f.stages.flatMap { it.evidence } + f.hardRules.flatMap { it.requireAll + it.requireAny }

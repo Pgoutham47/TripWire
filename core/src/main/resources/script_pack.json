@@ -1597,6 +1597,10 @@
    "en": "Installed {app} from a link",
    "hi": "लिंक से {app} इंस्टॉल किया"
   },
+  "timeline.app_installed_unnamed": {
+   "en": "Installed an app from a link",
+   "hi": "लिंक से एक ऐप इंस्टॉल किया"
+  },
   "timeline.payment": {
    "en": "Payment to {handle}",
    "hi": "{handle} को भुगतान"
@@ -1660,6 +1664,10 @@
   "timeline.install_screen": {
    "en": "Started installing {app} from a link",
    "hi": "लिंक से {app} इंस्टॉल करना शुरू किया"
+  },
+  "timeline.install_screen_unnamed": {
+   "en": "Started installing an app from a link",
+   "hi": "लिंक से एक ऐप इंस्टॉल करना शुरू किया"
   },
   "timeline.call": {
    "en": "Call from a stranger",

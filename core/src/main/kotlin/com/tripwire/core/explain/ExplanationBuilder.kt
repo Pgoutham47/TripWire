@@ -186,8 +186,12 @@ class ExplanationBuilder(private val pack: ScriptPack) {
                     (if (top == null || top.confidence < 0.5) null else tacticWords(top.tactic, lang)) to false
                 }
                 EventType.GROUP_ADDED -> string("timeline.group_added", lang, mapOf("group" to (e.groupName ?: ""))) to true
-                EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED ->
-                    string(if (e.type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: ""))) to true
+                EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED -> {
+                    // The install screen's title can be unreadable; then the app is not named at all.
+                    val key = if (e.type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen"
+                    val name = e.installedLabel?.takeIf { it.isNotBlank() } ?: e.installedPackage?.takeIf { it.isNotBlank() }
+                    (if (name != null) string(key, lang, mapOf("app" to name)) else string("${key}_unnamed", lang)) to true
+                }
                 EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED -> {
                     // A payment app opening has no payee yet; the row already names the app.
                     val handle = e.upi?.payeeHandle?.takeIf { it.isNotBlank() }
