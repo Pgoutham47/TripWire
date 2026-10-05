@@ -1,0 +1,447 @@
+1
+00:00:00,000 --> 00:00:04,700
+In India, someone loses their savings to a scam that didn't look like one.
+
+2
+00:00:04,700 --> 00:00:10,300
+A stock tip in a WhatsApp group. A call from “the police”. An app sent as a link.
+
+3
+00:00:10,300 --> 00:00:13,500
+By the time they realise, the money is already gone,
+
+4
+00:00:13,500 --> 00:00:17,050
+because UPI payments cannot be undone.
+
+5
+00:00:17,050 --> 00:00:19,370
+I am Geeta, and this is Tripwire.
+
+6
+00:00:19,370 --> 00:00:25,650
+It follows a scam as it unfolds, across WhatsApp, Telegram, SMS, calls and payments,
+
+7
+00:00:25,650 --> 00:00:30,150
+and stops you at the one moment that matters: right before you pay.
+
+8
+00:00:30,150 --> 00:00:31,250
+Let me show you.
+
+9
+00:00:31,370 --> 00:00:32,350
+Last year,
+
+10
+00:00:32,350 --> 00:00:33,310
+Indians lost over
+
+11
+00:00:33,310 --> 00:00:36,337
+₹22,000 crore to cyber fraud.
+
+12
+00:00:36,430 --> 00:00:38,090
+Three of every four rupees
+
+13
+00:00:38,090 --> 00:00:39,877
+were never recovered.
+
+14
+00:00:39,980 --> 00:00:42,280
+Because a scam isn't one message.
+
+15
+00:00:42,280 --> 00:00:44,920
+It's a script that plays out over days,
+
+16
+00:00:44,920 --> 00:00:46,200
+across apps.
+
+17
+00:00:46,200 --> 00:00:49,073
+And no single app sees all of it.
+
+18
+00:00:49,180 --> 00:00:50,860
+Meet Tripwire.
+
+19
+00:00:50,860 --> 00:00:53,640
+A stranger promises guaranteed returns.
+
+20
+00:00:53,640 --> 00:00:55,540
+Tripwire is already reading the pattern,
+
+21
+00:00:55,540 --> 00:00:57,794
+quietly, on the phone.
+
+22
+00:00:57,910 --> 00:00:59,910
+Then comes an app link.
+
+23
+00:00:59,910 --> 00:01:02,650
+Each step is matched against how
+
+24
+00:01:02,650 --> 00:01:04,980
+real investment scams unfold.
+
+25
+00:01:05,080 --> 00:01:07,120
+When the install screen opens,
+
+26
+00:01:07,120 --> 00:01:08,400
+Tripwire steps in before
+
+27
+00:01:08,400 --> 00:01:09,440
+the app is installed,
+
+28
+00:01:09,440 --> 00:01:10,921
+not after.
+
+29
+00:01:11,050 --> 00:01:14,320
+One tap, and the install is cancelled.
+
+30
+00:01:15,450 --> 00:01:17,810
+And at the moment of payment,
+
+31
+00:01:17,810 --> 00:01:20,570
+it shows exactly why: what happened,
+
+32
+00:01:20,570 --> 00:01:22,940
+in order, and a hard fact.
+
+33
+00:01:23,270 --> 00:01:24,690
+Registered brokers must
+
+34
+00:01:24,690 --> 00:01:27,920
+use a SEBI @valid address.
+
+35
+00:01:27,990 --> 00:01:29,543
+This one doesn't.
+
+36
+00:01:29,650 --> 00:01:31,090
+It never blocks you.
+
+37
+00:01:31,090 --> 00:01:32,370
+You can still go ahead,
+
+38
+00:01:32,370 --> 00:01:34,492
+but only on purpose.
+
+39
+00:01:34,620 --> 00:01:36,380
+A code arrives while a
+
+40
+00:01:36,380 --> 00:01:38,000
+stranger is on the line?
+
+41
+00:01:38,000 --> 00:01:40,400
+Tripwire warns you not to share it,
+
+42
+00:01:40,400 --> 00:01:42,753
+without ever reading the code.
+
+43
+00:01:42,850 --> 00:01:44,350
+A fake “money credited”
+
+44
+00:01:44,350 --> 00:01:45,990
+message from a mobile number?
+
+45
+00:01:45,990 --> 00:01:49,587
+Flagged. Banks never send from one.
+
+46
+00:01:49,690 --> 00:01:51,470
+Phone checkup finds apps
+
+47
+00:01:51,470 --> 00:01:53,230
+that can steal your codes,
+
+48
+00:01:53,230 --> 00:01:55,275
+and helps you remove them.
+
+49
+00:01:55,600 --> 00:01:57,300
+If an app from a link grabs
+
+50
+00:01:57,300 --> 00:01:58,980
+control of your screen,
+
+51
+00:01:58,980 --> 00:02:01,907
+Tripwire raises the alarm instantly.
+
+52
+00:02:02,010 --> 00:02:04,370
+Warnings in Hindi or English,
+
+53
+00:02:04,370 --> 00:02:06,710
+read aloud for those who need it.
+
+54
+00:02:07,210 --> 00:02:09,140
+If money is already gone,
+
+55
+00:02:09,390 --> 00:02:10,550
+every minute counts.
+
+56
+00:02:10,550 --> 00:02:12,310
+Tripwire starts the clock,
+
+57
+00:02:12,310 --> 00:02:16,126
+calls 1930 and your bank's fraud line,
+
+58
+00:02:16,230 --> 00:02:19,820
+and builds the complaint pack in seconds.
+
+59
+00:02:20,760 --> 00:02:23,480
+Scammers change their words every day,
+
+60
+00:02:23,480 --> 00:02:25,520
+so keyword rules miss a lot,
+
+61
+00:02:25,520 --> 00:02:28,020
+especially in Hindi and Hinglish.
+
+62
+00:02:28,020 --> 00:02:31,176
+That's why we built our own AI model.
+
+63
+00:02:31,280 --> 00:02:33,240
+It reads each message and
+
+64
+00:02:33,240 --> 00:02:35,290
+names the trick being used:
+
+65
+00:02:35,590 --> 00:02:37,880
+a promise of guaranteed returns,
+
+66
+00:02:37,880 --> 00:02:39,160
+pressure to act now,
+
+67
+00:02:39,160 --> 00:02:41,266
+or a request to keep it secret.
+
+68
+00:02:41,380 --> 00:02:44,760
+First, we defined 14 scam tactics,
+
+69
+00:02:44,760 --> 00:02:46,360
+with a clear rule for
+
+70
+00:02:46,360 --> 00:02:48,292
+when each one applies.
+
+71
+00:02:48,390 --> 00:02:50,390
+Then we built a dataset
+
+72
+00:02:50,390 --> 00:02:51,850
+of 15,000 messages,
+
+73
+00:02:51,850 --> 00:02:54,270
+in English, Hindi and Hinglish,
+
+74
+00:02:54,270 --> 00:02:56,410
+both scam and everyday,
+
+75
+00:02:56,410 --> 00:02:58,323
+each labelled with its tactics.
+
+76
+00:02:58,420 --> 00:03:01,220
+We trained an open model, Qwen 2.5,
+
+77
+00:03:01,220 --> 00:03:03,180
+with half a billion parameters,
+
+78
+00:03:03,180 --> 00:03:04,040
+on a laptop,
+
+79
+00:03:04,040 --> 00:03:06,577
+using a technique called LoRA.
+
+80
+00:03:06,690 --> 00:03:09,130
+Then we compressed it into a single
+
+81
+00:03:09,130 --> 00:03:10,930
+file built for Android phones,
+
+82
+00:03:10,930 --> 00:03:14,391
+so messages never have to leave the phone.
+
+83
+00:03:14,490 --> 00:03:17,130
+On messages it had never seen,
+
+84
+00:03:17,130 --> 00:03:19,470
+it nearly doubled our Hindi detection.
+
+85
+00:03:19,470 --> 00:03:21,870
+And when we replayed scam conversations,
+
+86
+00:03:21,870 --> 00:03:24,310
+it caught all six before the payment,
+
+87
+00:03:24,310 --> 00:03:26,600
+with no false warnings.
+
+88
+00:03:26,990 --> 00:03:29,130
+Now we're cutting its false
+
+89
+00:03:29,130 --> 00:03:31,330
+alarms on everyday messages,
+
+90
+00:03:31,330 --> 00:03:33,230
+with real chats,
+
+91
+00:03:33,230 --> 00:03:34,590
+personal details removed,
+
+92
+00:03:34,590 --> 00:03:36,950
+and Google's larger Gemma models,
+
+93
+00:03:36,950 --> 00:03:41,180
+before we switch it on for everyone.
+
+94
+00:03:42,040 --> 00:03:44,200
+Already, when a warning fires,
+
+95
+00:03:44,200 --> 00:03:45,560
+Tripwire prepares a text
+
+96
+00:03:45,560 --> 00:03:47,120
+to a trusted person,
+
+97
+00:03:47,120 --> 00:03:48,621
+ready to send.
+
+98
+00:03:48,720 --> 00:03:51,450
+And this is where Tripwire is going.
+
+99
+00:03:51,920 --> 00:03:54,520
+When a warning fires on Mum's phone,
+
+100
+00:03:54,520 --> 00:03:56,280
+her son is alerted instantly,
+
+101
+00:03:56,280 --> 00:03:57,680
+with the type of scam
+
+102
+00:03:57,680 --> 00:04:00,300
+and how far it has got,
+
+103
+00:04:00,300 --> 00:04:02,210
+never her messages.
+
+104
+00:04:02,550 --> 00:04:04,150
+Before a big payment
+
+105
+00:04:04,150 --> 00:04:05,810
+to a stranger goes out,
+
+106
+00:04:05,810 --> 00:04:07,510
+he approves it or stops it,
+
+107
+00:04:07,510 --> 00:04:09,357
+from his own phone.
+
+108
+00:04:09,460 --> 00:04:12,480
+And every warning speaks her language:
+
+109
+00:04:12,480 --> 00:04:15,360
+Hindi, Telugu, Tamil, Bengali,
+
+110
+00:04:15,360 --> 00:04:16,852
+Marathi and more.
+
+111
+00:04:16,960 --> 00:04:17,840
+Tripwire.
+
+112
+00:04:17,840 --> 00:04:20,888
+Stops the scam before the payment.

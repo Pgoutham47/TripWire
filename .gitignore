@@ -20,3 +20,10 @@ tools/model/convert/.cache/
 tools/model/*.log
 __pycache__/
 *.pyc
+# Built APKs are shared as files, not committed.
+*.apk
+# Demo video: only the build script and subtitles are tracked; recordings and renders are too large.
+video/raw/
+video/build/
+video/vo/
+*.mp4
