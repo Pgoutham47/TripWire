@@ -62,7 +62,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,6 +92,8 @@ import com.tripwire.core.model.EventType
 import com.tripwire.core.model.TripwireMoment
 import com.tripwire.core.script.ScriptPack
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -187,6 +196,8 @@ class WarningActivity : ComponentActivity() {
         val graph = applicationContext.graph
         req = r
         stage = Phase.Warning
+        // Screen readers announce the window by its title: "Tripwire warning", not just "Tripwire".
+        title = Ui.t("warning.brand", r.warning.language)
         graph.notifier.cancelWarning()
         graph.speaker.stop()
         if (graph.settings.current.speechOn) graph.speaker.speak(r.warning.spoken, r.warning.language)
@@ -302,12 +313,11 @@ private fun WarningScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.size(8.dp))
-                Text(Ui.t("warning.brand", lang), style = MaterialTheme.typography.titleSmall)
-                Spacer(Modifier.weight(1f))
-                TextButton(onClick = onReplay, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text(Ui.t("warning.brand", lang), style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                TextButton(onClick = onReplay, modifier = Modifier.heightIn(min = 56.dp)) {
                     Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.size(6.dp))
-                    Text(Ui.t("warning.replay", lang), style = MaterialTheme.typography.labelMedium)
+                    Text(Ui.t("warning.replay", lang), style = MaterialTheme.typography.labelLarge)
                 }
             }
 
@@ -315,7 +325,7 @@ private fun WarningScreen(
             Surface(color = danger.container, contentColor = danger.onContainer, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(Icons.Filled.ReportProblem, contentDescription = null, tint = danger.main, modifier = Modifier.size(40.dp))
-                    Text(w.headline, style = MaterialTheme.typography.headlineMedium)
+                    Text(w.headline, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
                 }
             }
 
@@ -339,19 +349,18 @@ private fun WarningScreen(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text(Ui.t("warning.what_happened", lang), style = MaterialTheme.typography.titleMedium)
+                        Text(Ui.t("warning.what_happened", lang), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
                         val fmt = SimpleDateFormat("d MMM, h:mm a", Locale.getDefault())
                         w.timeline.forEach { item ->
-                            Row {
-                                Box(Modifier.padding(top = 6.dp).size(10.dp).clip(CircleShape).background(danger.main))
+                            val time = fmt.format(Date(item.time))
+                            val app = appLabel(item.app)
+                            // One stop per event for a screen reader, the event first, then when and where.
+                            Row(Modifier.clearAndSetSemantics { contentDescription = "${item.label}. $time, $app" }) {
+                                Box(Modifier.padding(top = 8.dp).size(10.dp).clip(CircleShape).background(danger.main))
                                 Spacer(Modifier.size(14.dp))
                                 Column {
-                                    Text(
-                                        "${fmt.format(Date(item.time))} · ${appLabel(item.app)}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
-                                    Text(item.label, style = MaterialTheme.typography.bodyLarge)
+                                    Text("$time · $app", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text(item.label, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
                                 }
                             }
                         }
@@ -411,47 +420,105 @@ private fun WarningScreen(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
-                TextButton(onClick = onTrusted, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                    Text(Ui.t("warning.trusted", lang), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                TextButton(onClick = onTrusted, modifier = Modifier.weight(1f).heightIn(min = 56.dp)) {
+                    Text(Ui.t("warning.trusted", lang), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                 }
                 if (w.moment == TripwireMoment.PAYMENT || w.moment == TripwireMoment.CALL) {
-                    TextButton(onClick = onPaid, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                        Text(Ui.t("warning.already_paid", lang), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                    TextButton(onClick = onPaid, modifier = Modifier.weight(1f).heightIn(min = 56.dp)) {
+                        Text(Ui.t("warning.already_paid", lang), style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Center)
                     }
                 }
             }
 
             // 8. Proceed, small, press and hold for three seconds
-            HoldToProceed(w.proceedLabel, Ui.t("warning.hold", lang), onProceed)
+            HoldToProceed(w.proceedLabel, lang, onProceed)
         }
     }
 }
 
-/** INT-05: proceeding is always possible, but needs a deliberate three-second hold. */
+/**
+ * INT-05: proceeding is always possible, but needs a deliberate three-second hold. The hold is
+ * timed by the clock, not by the fill animation, which ends at once when the system "Remove
+ * animations" setting is on. Screen reader and switch users cannot hold a point on screen, so the
+ * control also has a click action that waits the same three seconds, then asks once more (PRD 13.4).
+ */
 @Composable
-private fun HoldToProceed(label: String, holdingLabel: String, onDone: () -> Unit) {
+private fun HoldToProceed(label: String, lang: String, onDone: () -> Unit) {
     val progress = remember { Animatable(0f) }
     var holding by remember { mutableStateOf(false) }
+    var step by remember { mutableStateOf(HoldStep.Idle) }
+    var stepJob by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
+
+    /** Fills the bar over three seconds; [then] runs once the three seconds are up. */
+    fun countdown(then: suspend () -> Unit): Job = scope.launch {
+        launch { progress.snapTo(0f); progress.animateTo(1f, tween(HOLD_MS, easing = LinearEasing)) }
+        delay(HOLD_MS.toLong())
+        then()
+    }
+
+    fun reset() {
+        stepJob?.cancel()
+        step = HoldStep.Idle
+        scope.launch { progress.animateTo(0f, tween(200)) }
+    }
+
+    val shown = when {
+        holding -> Ui.t("warning.hold", lang)
+        step == HoldStep.Waiting -> Ui.t("warning.hold_wait", lang)
+        step == HoldStep.Ready -> Ui.t("warning.hold_ready", lang)
+        else -> label
+    }
+    val action = when (step) {
+        HoldStep.Idle -> Ui.t("warning.hold_start", lang)
+        HoldStep.Waiting -> Ui.t("warning.hold_cancel", lang)
+        HoldStep.Ready -> Ui.t("warning.hold_go", lang)
+    }
     Box(
         Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clip(RoundedCornerShape(28.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(28.dp))
-            .semantics { contentDescription = label }
+            .clearAndSetSemantics {
+                role = Role.Button
+                contentDescription = shown
+                // The label change is read out when the wait ends, without moving focus.
+                liveRegion = LiveRegionMode.Polite
+                onClick(label = action) {
+                    when (step) {
+                        HoldStep.Idle -> {
+                            step = HoldStep.Waiting
+                            stepJob = countdown {
+                                step = HoldStep.Ready
+                                // Not confirmed in time: back to the start, so a later stray tap does nothing.
+                                delay(READY_MS)
+                                reset()
+                            }
+                        }
+                        HoldStep.Waiting -> reset()
+                        HoldStep.Ready -> {
+                            reset()
+                            onDone()
+                        }
+                    }
+                    true
+                }
+            }
             .pointerInput(Unit) {
                 awaitEachGesture {
                     awaitFirstDown()
+                    stepJob?.cancel()
+                    step = HoldStep.Idle
                     holding = true
-                    val job = scope.launch {
-                        progress.snapTo(0f)
-                        progress.animateTo(1f, tween(3000, easing = LinearEasing))
+                    var passed = false
+                    val job = countdown {
+                        passed = true
                         onDone()
                     }
                     waitForUpOrCancellation()
                     holding = false
-                    if (progress.value < 1f) {
+                    if (!passed) {
                         job.cancel()
                         scope.launch { progress.animateTo(0f, tween(200)) }
                     }
@@ -463,9 +530,21 @@ private fun HoldToProceed(label: String, holdingLabel: String, onDone: () -> Uni
             Modifier.align(Alignment.CenterStart).fillMaxWidth(progress.value.coerceIn(0f, 1f)).heightIn(min = 56.dp)
                 .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)),
         )
-        Text(if (holding) holdingLabel else label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            shown,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
     }
 }
+
+/** The screen reader path through [HoldToProceed]: start the wait, wait, then confirm. */
+private enum class HoldStep { Idle, Waiting, Ready }
+
+private const val HOLD_MS = 3000
+private const val READY_MS = 10_000L
 
 @Composable
 private fun FeedbackScreen(lang: String, onAnswer: (Feedback?) -> Unit) {
@@ -474,13 +553,13 @@ private fun FeedbackScreen(lang: String, onAnswer: (Feedback?) -> Unit) {
             Modifier.systemBarsPadding().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
-            Text(Ui.t("warning.feedback", lang), style = MaterialTheme.typography.headlineMedium)
+            Text(Ui.t("warning.feedback", lang), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.semantics { heading() })
             listOf(Feedback.SCAM to "feedback.yes", Feedback.GENUINE to "feedback.no", Feedback.NOT_SURE to "feedback.not_sure").forEach { (fb, key) ->
                 OutlinedButton(onClick = { onAnswer(fb) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = MaterialTheme.shapes.medium) {
                     Text(Ui.t(key, lang), style = MaterialTheme.typography.labelLarge)
                 }
             }
-            TextButton(onClick = { onAnswer(null) }, modifier = Modifier.heightIn(min = 48.dp)) { Text(Ui.t("btn.skip", lang)) }
+            TextButton(onClick = { onAnswer(null) }, modifier = Modifier.heightIn(min = 56.dp)) { Text(Ui.t("btn.skip", lang), style = MaterialTheme.typography.labelLarge) }
         }
     }
 }

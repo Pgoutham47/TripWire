@@ -245,6 +245,12 @@ object Ui {
         "warning.brand" to L("Tripwire warning", "Tripwire चेतावनी"),
         "warning.what_happened" to L("What happened", "क्या हुआ"),
         "warning.hold" to L("Keep holding…", "दबाए रखें…"),
+        // Screen reader path through the hold (PRD 13.4). The action labels follow "Double-tap to".
+        "warning.hold_start" to L("start a 3-second wait", "3 सेकंड का इंतज़ार शुरू करें"),
+        "warning.hold_wait" to L("Wait 3 seconds…", "3 सेकंड रुकें…"),
+        "warning.hold_cancel" to L("cancel", "रद्द करें"),
+        "warning.hold_ready" to L("Confirm to go ahead anyway", "फिर भी आगे बढ़ने की पुष्टि करें"),
+        "warning.hold_go" to L("go ahead anyway", "फिर भी आगे बढ़ें"),
         "warning.replay" to L("Read aloud again", "फिर से सुनाएँ"),
         "warning.already_paid" to L("I already paid", "मैंने भुगतान कर दिया"),
         "warning.trusted" to L("I know this person", "मैं इन्हें जानता/जानती हूँ"),
