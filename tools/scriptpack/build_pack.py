@@ -586,7 +586,9 @@ strings = {
 
     "timeline.group_added": L("Added to {group}", "{group} में जोड़ा गया"),
     "timeline.app_installed": L("Installed {app} from a link", "लिंक से {app} इंस्टॉल किया"),
+    "timeline.app_installed_unnamed": L("Installed an app from a link", "लिंक से एक ऐप इंस्टॉल किया"),
     "timeline.payment": L("Payment to {handle}", "{handle} को भुगतान"),
+    "timeline.payment_started": L("Started a payment", "भुगतान शुरू किया"),
     "timeline.collect_request": L("Asked you to approve a payment request", "भुगतान का अनुरोध मंज़ूर करने को कहा"),
 
     "guard.otp.title": L("Don't share this code", "यह कोड किसी को न बताएँ"),
@@ -608,6 +610,7 @@ strings = {
     "guard.access.notifications": L("access to your notifications and codes", "आपके नोटिफ़िकेशन और कोड पढ़ने की अनुमति"),
 
     "timeline.install_screen": L("Started installing {app} from a link", "लिंक से {app} इंस्टॉल करना शुरू किया"),
+    "timeline.install_screen_unnamed": L("Started installing an app from a link", "लिंक से एक ऐप इंस्टॉल करना शुरू किया"),
     "timeline.call": L("Call from a stranger", "अनजान नंबर से कॉल"),
     "timeline.video_call": L("Video call from a stranger", "अनजान नंबर से वीडियो कॉल"),
     "timeline.screen_share": L("Screen sharing started", "स्क्रीन शेयरिंग शुरू हुई"),
