@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -191,7 +192,7 @@ class WarningActivity : ComponentActivity() {
     private fun decode(intent: Intent?): WarningRequest? =
         intent?.getStringExtra(EXTRA)?.let { runCatching { ScriptPack.json.decodeFromString(WarningRequest.serializer(), it) }.getOrNull() }
 
-    /** Shows [r] from the top: clears its notification and reads it aloud. */
+    /** Shows [r] from the top: clears its notification and reads it aloud, unless a screen reader is on. */
     private fun present(r: WarningRequest) {
         val graph = applicationContext.graph
         req = r
@@ -200,7 +201,10 @@ class WarningActivity : ComponentActivity() {
         title = Ui.t("warning.brand", r.warning.language)
         graph.notifier.cancelWarning()
         graph.speaker.stop()
-        if (graph.settings.current.speechOn) graph.speaker.speak(r.warning.spoken, r.warning.language)
+        // TalkBack already reads the screen; a second voice would talk over it (PRD 13.4).
+        // "Read aloud again" still works.
+        val screenReader = getSystemService(AccessibilityManager::class.java)?.isTouchExplorationEnabled == true
+        if (graph.settings.current.speechOn && !screenReader) graph.speaker.speak(r.warning.spoken, r.warning.language)
     }
 
     override fun onDestroy() {
