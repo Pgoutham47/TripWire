@@ -48,7 +48,8 @@ class Notifier(private val context: Context) {
         )
         val text = when {
             paused -> Ui.t("status.paused", lang)
-            activeCases > 0 -> Ui.t("status.watching_cases", lang, "n" to activeCases.toString())
+            activeCases == 1 -> Ui.t("status.watching_case", lang)
+            activeCases > 1 -> Ui.t("status.watching_cases", lang, "n" to activeCases.toString())
             else -> Ui.t("status.protecting", lang)
         }
         return NotificationCompat.Builder(context, CH_PROTECTION)

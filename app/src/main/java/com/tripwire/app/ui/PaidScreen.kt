@@ -2,7 +2,22 @@ package com.tripwire.app.ui
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -17,7 +32,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -72,32 +90,37 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
 
     Page(Ui.t("paid.title", lang), onBack, Ui.t("btn.back", lang)) {
         // EVD-03: golden-hour countdown, and the one most important button.
-        InfoCard(container = MaterialTheme.colorScheme.errorContainer) {
-            Text(
-                if (left > 0) Ui.t("paid.countdown", lang, "m" to left.toString()) else Ui.t("paid.expired", lang),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
-        BigButton(Ui.t("btn.call_1930", lang), color = MaterialTheme.colorScheme.error) {
-            context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:1930")))
+        ToneCard(Status.colors.danger) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Timer, contentDescription = null, modifier = Modifier.size(32.dp))
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    if (left > 0) Ui.t("paid.left", lang, "m" to left.toString()) else Ui.t("paid.expired", lang),
+                    style = if (left > 0) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleMedium,
+                )
+            }
+            if (left > 0) Text(Ui.t("paid.left_body", lang), style = MaterialTheme.typography.bodyLarge)
+            BigButton(Ui.t("btn.call_1930", lang), color = MaterialTheme.colorScheme.error, icon = Icons.Filled.Call) {
+                context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:1930")))
+            }
         }
 
         if (cases.isNotEmpty()) {
-            Text(Ui.t("paid.which", lang), style = MaterialTheme.typography.titleMedium)
+            SectionHeader(Ui.t("paid.which", lang))
             cases.forEach { c ->
-                if (c.caseId == caseId) BigButton("${c.title} · ${c.family}") {}
-                else QuietButton("${c.title} · ${c.family}") { caseId = c.caseId }
+                SelectCard(c.title, "${c.family.replaceFirstChar { it.uppercase() }} · ${c.apps.joinToString(", ")}", c.caseId == caseId) { caseId = c.caseId }
             }
-            QuietButton(Ui.t("paid.none", lang)) { caseId = null }
+            SelectCard(Ui.t("paid.none", lang), null, caseId == null) { caseId = null }
         }
 
-        if (prefilled) Text(Ui.t("paid.prefilled", lang), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+        SectionHeader(Ui.t("paid.details", lang))
+        if (prefilled) Text(Ui.t("paid.prefilled", lang), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Field(Ui.t("paid.amount", lang), amount, KeyboardType.Number) { amount = it.filter(Char::isDigit) }
         Field(Ui.t("paid.minutes_ago", lang), minutesAgo, KeyboardType.Number) { minutesAgo = it.filter(Char::isDigit) }
         Field(Ui.t("paid.handle", lang), handle, KeyboardType.Email) { handle = it.trim() }
         Field(Ui.t("paid.utr", lang), utr, KeyboardType.Number) { utr = it.filter(Char::isDigit) }
 
-        BigButton(Ui.t("btn.build_pack", lang)) {
+        BigButton(Ui.t("btn.build_pack", lang), icon = Icons.Filled.Description) {
             scope.launch {
                 built = vm.buildPack(
                     caseId,
@@ -113,9 +136,15 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
         }
 
         built?.let { (pack, file) ->
-            Text(Ui.t("paid.pack_ready", lang), style = MaterialTheme.typography.titleMedium, color = TwColors.Ok)
-            QuietButton(Ui.t("btn.share_pack", lang)) { context.startActivity(vm.shareIntent(file)) }
-            QuietButton(Ui.t("btn.portal", lang)) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://cybercrime.gov.in"))) }
+            ToneCard(Status.colors.safe) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(28.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text(Ui.t("paid.pack_ready", lang), style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            QuietButton(Ui.t("btn.share_pack", lang), icon = Icons.Filled.Share) { context.startActivity(vm.shareIntent(file)) }
+            QuietButton(Ui.t("btn.portal", lang), icon = Icons.Filled.OpenInBrowser) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://cybercrime.gov.in"))) }
             InfoCard {
                 Text(Ui.t("paid.script", lang), style = MaterialTheme.typography.titleMedium)
                 Text(vm.callScript(pack), style = MaterialTheme.typography.bodyLarge)
@@ -125,7 +154,19 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
         // EVD-07: next steps.
         InfoCard {
             Text(Ui.t("paid.next", lang), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            listOf("paid.next1", "paid.next2", "paid.next3", "paid.next4").forEach { Text("• " + Ui.t(it, lang), style = MaterialTheme.typography.bodyLarge) }
+            listOf("paid.next1", "paid.next2", "paid.next3", "paid.next4").forEachIndexed { i, key ->
+                Row {
+                    Text(
+                        "${i + 1}",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 2.dp).size(24.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary).padding(top = 2.dp),
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(Ui.t(key, lang), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
         }
     }
 }
@@ -139,6 +180,7 @@ private fun Field(label: String, value: String, type: KeyboardType, onChange: (S
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = type),
         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        shape = MaterialTheme.shapes.medium,
         textStyle = MaterialTheme.typography.bodyLarge,
     )
 }

@@ -50,6 +50,7 @@ data class CaseItem(
 )
 
 data class TimelineRow(
+    val type: EventType,
     val time: Long,
     val app: String,
     val title: String,
@@ -102,7 +103,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         EventType.PAYMENT_SMS -> explain.string("timeline.paid", lang)
                         else -> type.wire
                     }
-                    TimelineRow(e.timestamp, e.app, title, if (e.textDeleted) Ui.t("timeline.deleted", lang) else e.text, tactics)
+                    TimelineRow(type, e.timestamp, e.app, title, if (e.textDeleted) Ui.t("timeline.deleted", lang) else e.text, tactics)
                 }
                 val family = state.topFamily?.let { graph.pack.family(it) }
                 TimelineUi(

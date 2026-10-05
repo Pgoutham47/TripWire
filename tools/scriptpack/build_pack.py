@@ -588,9 +588,9 @@ strings = {
     "timeline.paid": L("Money was sent", "पैसे भेजे गए"),
 
     "stage.contact": L("first contact", "पहला संपर्क"),
-    "stage.hook": L("hook", "लालच या डर"),
+    "stage.hook": L("bait or threat", "लालच या डर"),
     "stage.grooming": L("building trust", "भरोसा जमाना"),
-    "stage.commitment": L("first step", "पहला कदम"),
+    "stage.commitment": L("getting you to act", "आपसे कुछ करवाना"),
     "stage.extraction": L("asking for money", "पैसे की माँग"),
     "stage.lock_in": L("demanding more", "और पैसे की माँग"),
 

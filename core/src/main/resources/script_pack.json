@@ -1446,7 +1446,7 @@
    "hi": "पहला संपर्क"
   },
   "stage.hook": {
-   "en": "hook",
+   "en": "bait or threat",
    "hi": "लालच या डर"
   },
   "stage.grooming": {
@@ -1454,8 +1454,8 @@
    "hi": "भरोसा जमाना"
   },
   "stage.commitment": {
-   "en": "first step",
-   "hi": "पहला कदम"
+   "en": "getting you to act",
+   "hi": "आपसे कुछ करवाना"
   },
   "stage.extraction": {
    "en": "asking for money",

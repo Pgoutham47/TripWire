@@ -4,7 +4,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Memory
+import androidx.compose.material.icons.filled.PauseCircle
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.Icon
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -18,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.tripwire.app.graph
@@ -37,28 +52,20 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, onDeleted: () -> Unit) 
     var scenarioMenu by remember { mutableStateOf(false) }
 
     Page(Ui.t("settings.title", lang), onBack, Ui.t("btn.back", lang)) {
-        Section(Ui.t("settings.language", lang)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Ui.languages.forEach { (code, name) ->
-                    if (code == lang) BigButton(name, Modifier.weight(1f)) {} else QuietButton(name, Modifier.weight(1f)) { vm.updateSettings { it.copy(language = code) } }
-                }
-            }
+        Section(Ui.t("settings.language", lang), Icons.Filled.Translate) {
+            ChoiceRow(Ui.languages, lang) { code -> vm.updateSettings { it.copy(language = code) } }
+            Toggle(Ui.t("settings.speech", lang), s.speechOn) { on -> vm.updateSettings { it.copy(speechOn = on) } }
         }
 
-        Toggle(Ui.t("settings.speech", lang), s.speechOn) { on -> vm.updateSettings { it.copy(speechOn = on) } }
-
-        Section(Ui.t("settings.retention", lang)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(7, 30, 90).forEach { d ->
-                    val label = Ui.t("settings.days", lang, "n" to d.toString())
-                    if (d == s.retentionDays) BigButton(label, Modifier.weight(1f)) {} else QuietButton(label, Modifier.weight(1f)) { vm.updateSettings { it.copy(retentionDays = d) } }
-                }
+        Section(Ui.t("settings.retention", lang), Icons.Filled.History) {
+            ChoiceRow(listOf(7, 30, 90).map { it.toString() to Ui.t("settings.days", lang, "n" to it.toString()) }, s.retentionDays.toString()) { d ->
+                vm.updateSettings { it.copy(retentionDays = d.toInt()) }
             }
         }
 
         // SET-04: pause for an hour or until tomorrow, with resume.
-        Section(Ui.t("settings.pause", lang)) {
-            Text(Ui.t("settings.disable_warning", lang), style = MaterialTheme.typography.bodyMedium)
+        Section(Ui.t("settings.pause", lang), Icons.Filled.PauseCircle) {
+            Text(Ui.t("settings.disable_warning", lang), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (s.isPaused(System.currentTimeMillis())) {
                 BigButton(Ui.t("settings.resume", lang)) { vm.updateSettings { it.copy(pausedUntil = 0) } }
             } else {
@@ -68,7 +75,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, onDeleted: () -> Unit) 
         }
 
         // SET-01: each collector on or off.
-        Section(Ui.t("settings.collectors", lang)) {
+        Section(Ui.t("settings.collectors", lang), Icons.Filled.Visibility) {
             listOf(EventType.MESSAGE, EventType.APP_INSTALLED, EventType.PAYMENT_APP_OPENED, EventType.CALL_STARTED, EventType.REMOTE_APP_OPENED).forEach { type ->
                 val on = type.wire !in s.disabledCollectors
                 Toggle(Ui.t("collector.${type.wire}", lang), on) { enable ->
@@ -80,7 +87,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, onDeleted: () -> Unit) 
             }
         }
 
-        Section(Ui.t("settings.allies", lang)) {
+        Section(Ui.t("settings.allies", lang), Icons.Filled.Person) {
             val ally = allies.firstOrNull()
             if (ally == null) Text(Ui.t("settings.no_ally", lang), style = MaterialTheme.typography.bodyLarge)
             else Row(verticalAlignment = Alignment.CenterVertically) {
@@ -89,28 +96,33 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, onDeleted: () -> Unit) 
             }
         }
 
-        Section(Ui.t("settings.model", lang)) {
-            Text(modelText(model, lang), style = MaterialTheme.typography.bodyLarge)
-            Text(Ui.t("settings.model_hint", lang, "path" to context.graph.models.pushDir.absolutePath), style = MaterialTheme.typography.bodyMedium)
+        Section(Ui.t("settings.model", lang), Icons.Filled.Memory) {
+            Text(modelText(model, lang).replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodyLarge)
+            Text(Ui.t("settings.model_hint", lang, "path" to context.graph.models.pushDir.absolutePath), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             QuietButton(Ui.t("btn.reload_model", lang)) { vm.refreshModel() }
             if (context.graph.models.downloadConfigured) QuietButton(Ui.t("btn.download_model", lang)) { vm.downloadModel() }
         }
 
-        Toggle(Ui.t("settings.share", lang), s.shareAnonymousPatterns, Ui.t("settings.share_body", lang)) { on -> vm.updateSettings { it.copy(shareAnonymousPatterns = on) } }
+        Section(Ui.t("settings.privacy", lang), Icons.Filled.Lock) {
+            Toggle(Ui.t("settings.share", lang), s.shareAnonymousPatterns, Ui.t("settings.share_body", lang)) { on -> vm.updateSettings { it.copy(shareAnonymousPatterns = on) } }
+        }
 
         // PRD 22 fallback: replay a recorded scam on this phone, in a private in-memory ledger.
-        Section(Ui.t("settings.demo", lang)) {
-            Text(Ui.t("settings.demo_body", lang), style = MaterialTheme.typography.bodyMedium)
+        Section(Ui.t("settings.demo", lang), Icons.Filled.PlayCircle) {
+            Text(Ui.t("settings.demo_body", lang), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if (!scenarioMenu) {
                 QuietButton(Ui.t("btn.test_warning", lang)) { scenarioMenu = true }
             } else {
                 vm.scenarios.filter { it.family != null }.forEach { sc ->
-                    QuietButton(sc.id) { vm.playScenario(sc.id) { req -> context.startActivity(WarningActivity.intent(context, req)) } }
+                    val name = context.graph.pipeline.explain.familyName(sc.family, lang).replaceFirstChar { it.uppercase() }
+                    QuietButton("$name · ${Ui.t("lang.${sc.language}", lang)}") {
+                        vm.playScenario(sc.id) { req -> context.startActivity(WarningActivity.intent(context, req)) }
+                    }
                 }
             }
         }
 
-        BigButton(Ui.t("settings.delete_all", lang), color = MaterialTheme.colorScheme.error) { confirmDelete = true }
+        QuietButton(Ui.t("settings.delete_all", lang), color = MaterialTheme.colorScheme.error, icon = Icons.Filled.DeleteForever) { confirmDelete = true }
     }
 
     if (confirmDelete) {
@@ -143,10 +155,14 @@ private fun tomorrowMorning(): Long = Calendar.getInstance().apply {
 }.timeInMillis
 
 @Composable
-private fun Section(title: String, content: @Composable () -> Unit) {
+private fun Section(title: String, icon: ImageVector, content: @Composable () -> Unit) {
     InfoCard {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.width(12.dp))
+            Text(title, style = MaterialTheme.typography.titleMedium)
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) { content() }
     }
 }
 
@@ -155,8 +171,9 @@ private fun Toggle(label: String, checked: Boolean, detail: String? = null, onCh
     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
-            detail?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary) }
+            detail?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
         }
+        Spacer(Modifier.width(12.dp))
         Switch(checked = checked, onCheckedChange = onChange)
     }
 }

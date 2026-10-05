@@ -11,12 +11,12 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,9 +29,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -52,13 +64,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.tripwire.app.MainActivity
 import com.tripwire.app.collect.UpiLinkActivity
 import com.tripwire.app.graph
+import com.tripwire.app.ui.Status
 import com.tripwire.app.ui.TripwireTheme
-import com.tripwire.app.ui.TwColors
 import com.tripwire.app.ui.Ui
 import com.tripwire.app.work.Workers
 import com.tripwire.core.checks.CheckOutcome
@@ -231,29 +244,39 @@ private fun WarningScreen(
     onReplay: () -> Unit,
 ) {
     val lang = w.language
-    val dark = isSystemInDarkTheme()
-    Surface(color = if (dark) TwColors.WarnSurfaceDark else TwColors.WarnSurface, modifier = Modifier.fillMaxSize()) {
+    val danger = Status.colors.danger
+    Surface(color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground, modifier = Modifier.fillMaxSize()) {
         Column(
-            Modifier.systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            Modifier.systemBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             // Brand mark the user saw during setup, so an imitation is easier to spot (PRD 15.4).
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(MaterialTheme.colorScheme.primary))
+                Icon(Icons.Filled.Shield, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                 Spacer(Modifier.size(8.dp))
-                Text(Ui.t("warning.brand", lang), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                Text(Ui.t("warning.brand", lang), style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.weight(1f))
-                TextButton(onClick = onReplay, modifier = Modifier.heightIn(min = 48.dp)) { Text("🔊 " + Ui.t("warning.replay", lang)) }
+                TextButton(onClick = onReplay, modifier = Modifier.heightIn(min = 48.dp)) {
+                    Icon(Icons.AutoMirrored.Filled.VolumeUp, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.size(6.dp))
+                    Text(Ui.t("warning.replay", lang), style = MaterialTheme.typography.labelMedium)
+                }
             }
 
             // 1. Headline
-            Text(w.headline, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.error)
+            Surface(color = danger.container, contentColor = danger.onContainer, shape = MaterialTheme.shapes.large, modifier = Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Filled.ReportProblem, contentDescription = null, tint = danger.main, modifier = Modifier.size(40.dp))
+                    Text(w.headline, style = MaterialTheme.typography.headlineMedium)
+                }
+            }
 
             // 2. Up to three reasons
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 w.reasons.forEach { r ->
                     Row {
-                        Text("•  ", style = MaterialTheme.typography.bodyLarge)
+                        Icon(Icons.Filled.Error, contentDescription = null, tint = danger.main, modifier = Modifier.padding(top = 2.dp).size(22.dp))
+                        Spacer(Modifier.size(12.dp))
                         Text(r, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
@@ -261,18 +284,27 @@ private fun WarningScreen(
 
             // 3. Timeline strip
             if (w.timeline.isNotEmpty()) {
-                Column(
-                    Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surface).padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                Surface(
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    shape = MaterialTheme.shapes.large,
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(Ui.t("warning.what_happened", lang), style = MaterialTheme.typography.titleMedium)
-                    val fmt = SimpleDateFormat("d MMM, h:mm a", Locale.getDefault())
-                    w.timeline.forEach { item ->
-                        Row(verticalAlignment = Alignment.Top) {
-                            Text(fmt.format(Date(item.time)), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(end = 10.dp).heightIn(min = 22.dp))
-                            Column {
-                                Text(item.label, style = MaterialTheme.typography.bodyLarge)
-                                Text(appLabel(item.app), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Text(Ui.t("warning.what_happened", lang), style = MaterialTheme.typography.titleMedium)
+                        val fmt = SimpleDateFormat("d MMM, h:mm a", Locale.getDefault())
+                        w.timeline.forEach { item ->
+                            Row {
+                                Box(Modifier.padding(top = 6.dp).size(10.dp).clip(CircleShape).background(danger.main))
+                                Spacer(Modifier.size(14.dp))
+                                Column {
+                                    Text(
+                                        "${fmt.format(Date(item.time))} · ${appLabel(item.app)}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(item.label, style = MaterialTheme.typography.bodyLarge)
+                                }
                             }
                         }
                     }
@@ -281,46 +313,63 @@ private fun WarningScreen(
 
             // 4. Grounded check, in a box
             w.check?.let { c ->
-                val color = when (c.outcome) {
-                    CheckOutcome.FAIL -> MaterialTheme.colorScheme.error
-                    CheckOutcome.PASS -> TwColors.Ok
-                    CheckOutcome.UNKNOWN -> TwColors.Caution
+                val (tone, icon) = when (c.outcome) {
+                    CheckOutcome.FAIL -> danger to Icons.Filled.Cancel
+                    CheckOutcome.PASS -> Status.colors.safe to Icons.Filled.CheckCircle
+                    CheckOutcome.UNKNOWN -> Status.colors.caution to Icons.Filled.Help
                 }
-                Text(
-                    c.text,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.fillMaxWidth().border(2.dp, color, RoundedCornerShape(12.dp)).padding(14.dp),
-                )
+                Surface(
+                    color = tone.container,
+                    contentColor = tone.onContainer,
+                    shape = MaterialTheme.shapes.medium,
+                    border = BorderStroke(2.dp, tone.main),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(icon, contentDescription = null, tint = tone.main, modifier = Modifier.size(28.dp))
+                        Spacer(Modifier.size(12.dp))
+                        Text(c.text, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
 
-            Text(w.closing, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+            Text(w.closing, style = MaterialTheme.typography.titleMedium)
 
             // 5. Primary button
             Button(
                 onClick = onPrimary,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error, contentColor = MaterialTheme.colorScheme.onError),
             ) { Text(w.primaryLabel, style = MaterialTheme.typography.titleLarge) }
 
             // 6. Call the ally
             val allyLabel = w.allyLabel
             if (allyLabel != null && allyPhone != null) {
-                OutlinedButton(onClick = onAlly, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                OutlinedButton(onClick = onAlly, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = MaterialTheme.shapes.medium) {
+                    Icon(Icons.Filled.Call, contentDescription = null, modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.size(10.dp))
                     Text(allyLabel, style = MaterialTheme.typography.labelLarge)
                 }
             }
 
             // 7. Verify on SEBI Check
             w.verifyLabel?.let { label ->
-                TextButton(onClick = onVerify, modifier = Modifier.heightIn(min = 48.dp)) { Text(label, style = MaterialTheme.typography.labelLarge) }
+                OutlinedButton(onClick = onVerify, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = MaterialTheme.shapes.medium) {
+                    Icon(Icons.Filled.Search, contentDescription = null, modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.size(10.dp))
+                    Text(label, style = MaterialTheme.typography.labelLarge)
+                }
             }
 
-            Spacer(Modifier.size(12.dp))
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onTrusted, modifier = Modifier.heightIn(min = 48.dp)) { Text(Ui.t("warning.trusted", lang)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                TextButton(onClick = onTrusted, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                    Text(Ui.t("warning.trusted", lang), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                }
                 if (w.moment == TripwireMoment.PAYMENT || w.moment == TripwireMoment.CALL) {
-                    TextButton(onClick = onPaid, modifier = Modifier.heightIn(min = 48.dp)) { Text(Ui.t("warning.already_paid", lang)) }
+                    TextButton(onClick = onPaid, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
+                        Text(Ui.t("warning.already_paid", lang), style = MaterialTheme.typography.labelMedium, textAlign = TextAlign.Center)
+                    }
                 }
             }
 
@@ -341,7 +390,7 @@ private fun HoldToProceed(label: String, holdingLabel: String, onDone: () -> Uni
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clip(RoundedCornerShape(28.dp))
-            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(28.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(28.dp))
             .semantics { contentDescription = label }
             .pointerInput(Unit) {
                 awaitEachGesture {
@@ -364,22 +413,22 @@ private fun HoldToProceed(label: String, holdingLabel: String, onDone: () -> Uni
     ) {
         Box(
             Modifier.align(Alignment.CenterStart).fillMaxWidth(progress.value.coerceIn(0f, 1f)).heightIn(min = 56.dp)
-                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)),
+                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.25f)),
         )
-        Text(if (holding) holdingLabel else label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+        Text(if (holding) holdingLabel else label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
 private fun FeedbackScreen(lang: String, onAnswer: (Feedback?) -> Unit) {
-    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background, contentColor = MaterialTheme.colorScheme.onBackground) {
         Column(
             Modifier.systemBarsPadding().padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         ) {
             Text(Ui.t("warning.feedback", lang), style = MaterialTheme.typography.headlineMedium)
             listOf(Feedback.SCAM to "feedback.yes", Feedback.GENUINE to "feedback.no", Feedback.NOT_SURE to "feedback.not_sure").forEach { (fb, key) ->
-                OutlinedButton(onClick = { onAnswer(fb) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                OutlinedButton(onClick = { onAnswer(fb) }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp), shape = MaterialTheme.shapes.medium) {
                     Text(Ui.t(key, lang), style = MaterialTheme.typography.labelLarge)
                 }
             }

@@ -129,7 +129,7 @@ private fun PermissionSteps(lang: String, onDone: () -> Unit) {
         Text(Ui.t("perm.without", lang, "what" to Ui.t(p.withoutKey, lang)), style = MaterialTheme.typography.bodyLarge)
         Spacer(Modifier.size(8.dp))
         if (granted) {
-            Text("✓ " + Ui.t("perm.granted", lang), color = TwColors.Ok, style = MaterialTheme.typography.titleMedium)
+            Text("✓ " + Ui.t("perm.granted", lang), color = Status.colors.safe.main, style = MaterialTheme.typography.titleMedium)
             BigButton(Ui.t("btn.next", lang)) { next() }
         } else {
             BigButton(Ui.t("btn.allow", lang)) {
