@@ -95,7 +95,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     val title = when (type) {
                         EventType.MESSAGE -> e.senderName ?: Ui.t("timeline.contact", lang)
                         EventType.GROUP_ADDED -> explain.string("timeline.group_added", lang, mapOf("group" to (e.groupName ?: "")))
-                        EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED -> explain.string("timeline.app_installed", lang, mapOf("app" to (e.installedLabel ?: "")))
+                        EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED -> explain.string(if (type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen", lang, mapOf("app" to (e.installedLabel ?: "")))
                         EventType.UPI_LINK_OPENED -> explain.string("timeline.payment", lang, mapOf("handle" to (e.upiJson?.let { Regex("\"payeeHandle\":\"([^\"]+)\"").find(it)?.groupValues?.get(1) } ?: "")))
                         EventType.PAYMENT_APP_OPENED -> explain.string("pack.payment_app_opened", lang, mapOf("app" to appLabel(e.app)))
                         EventType.CALL_STARTED -> explain.string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang)

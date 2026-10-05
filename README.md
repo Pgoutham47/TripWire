@@ -23,6 +23,7 @@ On-device scam protection for Android. Tripwire follows each stranger who contac
 | SIG: notifications, calls, payment SMS | `app/.../collect/NotificationCollector.kt`, `Contacts.kt` |
 | SIG: installs, payment and remote-access apps | `app/.../collect/SystemWatchers.kt` (run by `service/ProtectionService.kt`) |
 | SIG-08: UPI links | `app/.../collect/UpiLinkActivity.kt` |
+| SIG-11: install screen (optional on-screen reading) | `app/.../collect/InstallScreenWatcher.kt` |
 | LED: encrypted ledger | `app/.../data/Database.kt` (Room and SQLCipher, key in the Android Keystore), `RoomLedgerStore.kt` |
 | TAC: tactic reader | `core/.../tactic/`; `app/.../ai/LlmService.kt` runs LiteRT-LM in its own `:llm` process, and `LlmTacticReader.kt` is the client |
 | ENG, CHK, EXP | `core/.../engine/`, `core/.../checks/`, `core/.../explain/` |
@@ -70,7 +71,7 @@ Useful test inputs on an emulator:
 
 - **Android 15 notification redaction.** On the Android 15 emulator, the system notification assistant marked every SMS as sensitive. Third-party listeners then see only "Sensitive notification content hidden". Tripwire drops these instead of storing them, but it can't read those messages. The emulator tests disabled the assistant with `cmd notification disallow_assistant`. **Check this on the iQOO before relying on the SMS path.** This is PRD assumption 1.
 - **Ally alerts need one tap.** Tripwire holds no SMS permission (PRD 15.2) and has no push backend yet, so an ally alert opens a pre-filled text for the user to send. Push delivery through FCM (ALY-04) is still to do.
-- **Install warnings come after the install.** The warning arrives just after the install completes, with an offer to uninstall (INT-09). Warning before the install finishes needs on-screen reading (SIG-11, P1).
+- **Warning before an install needs on-screen reading.** With the optional "See the install screen" permission on, the warning appears over Android's install screen and "Don't install" cancels it (SIG-11). Without it, the warning comes just after the install, with an offer to uninstall (INT-09). The screen was checked on Samsung's installer; other phone makers' installers may lay it out differently.
 - **The model can't run on the Apple-silicon emulator.** Every LiteRT-LM backend hits an illegal CPU instruction there. The model runs in its own process, so these crashes never stop protection: Tripwire records the crashed backend, stops trying it and falls back to keyword rules. On-device inference must be verified on a real phone. The same `.litertlm` file runs correctly in LiteRT-LM 0.17 on the Mac.
 - **No WhatsApp or Telegram on the emulator.** Those parsers are covered by unit tests only, not by device tests yet.
 

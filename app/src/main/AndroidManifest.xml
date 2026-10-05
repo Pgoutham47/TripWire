@@ -79,6 +79,20 @@
             </intent-filter>
         </service>
 
+        <!-- SIG-11, optional: sees the system install screen so the warning comes before the install. -->
+        <service
+            android:name=".collect.InstallScreenWatcher"
+            android:exported="false"
+            android:label="@string/install_screen_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/install_screen_watcher" />
+        </service>
+
         <service
             android:name=".service.ProtectionService"
             android:exported="false"

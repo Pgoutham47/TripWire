@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.tripwire.app.MainActivity
+import com.tripwire.app.collect.InstallScreenWatcher
 import com.tripwire.app.collect.UpiLinkActivity
 import com.tripwire.app.graph
 import com.tripwire.app.ui.Status
@@ -188,11 +189,16 @@ class WarningActivity : ComponentActivity() {
     private fun stopAction() {
         when (req.warning.moment) {
             TripwireMoment.INSTALL -> {
-                // The install was seen after it finished (SIG-06), so "Don't install" offers removal (INT-09).
                 lifecycleScope.launch(Dispatchers.IO) {
                     val graph = applicationContext.graph
                     val members = graph.pipeline.membersOf(req.caseId)
-                    val installed = graph.store.eventsFor(members).lastOrNull { it.type == EventType.APP_INSTALLED }?.installedPackage
+                    val last = graph.store.eventsFor(members)
+                        .lastOrNull { it.type == EventType.APP_INSTALLED || it.type == EventType.INSTALL_SCREEN_OPENED }
+                    com.tripwire.app.engine.Guardian.debug { "don't install: last install event ${last?.type}" }
+                    // Caught on the install screen (SIG-11): cancel it, so nothing is installed.
+                    if (last?.type == EventType.INSTALL_SCREEN_OPENED && InstallScreenWatcher.cancelInstall()) return@launch
+                    // Seen after the install finished (SIG-06), so "Don't install" offers removal (INT-09).
+                    val installed = last?.takeIf { it.type == EventType.APP_INSTALLED }?.installedPackage
                     if (installed != null) {
                         withContext(Dispatchers.Main) {
                             @Suppress("DEPRECATION")

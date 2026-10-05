@@ -316,7 +316,9 @@ class TripwirePipeline(
         // A hard rule is recorded only when it is what allowed the warning (ENG-04 audit trail).
         val rule = if (risk >= warn) null else engine.hardRule(state, moment, momentSignals)?.second?.id
             ?: if (knownBad != null) "known_bad" else null
-        val subject = handle ?: obs.installedPackage ?: obs.app
+        // The install screen shows only the app's name, so installs are matched by name: the warning
+        // on the install screen and the one after the install are the same warning (SIG-11, INT-09).
+        val subject = handle ?: obs.installedLabel ?: obs.installedPackage ?: obs.app
         val trusted = members.any { store.counterparty(it)?.trusted == true }
         val duplicate = store.interventions(caseId).any {
             it.level == InterventionLevel.FULL_SCREEN && it.moment == moment && it.subject == subject && now - it.time < dedupeWindow(moment)

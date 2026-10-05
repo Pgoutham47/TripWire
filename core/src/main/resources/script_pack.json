@@ -45,6 +45,7 @@
     "entity:telegram": 0.4,
     "entity:amount": 0.2,
     "event:app_installed": 0.3,
+    "event:install_screen_opened": 0.3,
     "event:upi_link_opened": 0.4,
     "event:payment_app_opened": 0.2,
     "event:payment_sms": 0.2,
@@ -88,7 +89,8 @@
       "tag:install_request",
       "entity:apk_link",
       "check:install_source:fail",
-      "event:app_installed"
+      "event:app_installed",
+      "event:install_screen_opened"
      ],
      "minEvidence": 1.2
     },
@@ -340,6 +342,7 @@
     "entity:apk_link": 1.2,
     "ctx:kyc_mention": 1.2,
     "event:app_installed": 0.3,
+    "event:install_screen_opened": 0.3,
     "check:install_source:fail": 1.0,
     "check:lookalike:fail": 1.5,
     "event:remote_app_opened": 1.2,
@@ -377,7 +380,8 @@
       "entity:apk_link",
       "event:remote_app_opened",
       "event:screen_share_started",
-      "check:install_source:fail"
+      "check:install_source:fail",
+      "event:install_screen_opened"
      ],
      "minEvidence": 1.2
     },
@@ -1424,6 +1428,10 @@
   "timeline.payment": {
    "en": "Payment to {handle}",
    "hi": "{handle} को भुगतान"
+  },
+  "timeline.install_screen": {
+   "en": "Started installing {app} from a link",
+   "hi": "लिंक से {app} इंस्टॉल करना शुरू किया"
   },
   "timeline.call": {
    "en": "Call from a stranger",

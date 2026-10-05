@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
+import com.tripwire.app.collect.InstallScreenWatcher
 import com.tripwire.app.collect.UsageWatcher
 
 /** One permission from PRD 15.2, with its reason and what stops working without it (ONB-03). */
@@ -19,6 +20,7 @@ enum class Perm(val key: String, val required: Boolean) {
     CONTACTS("contacts", false),
     OVERLAY("overlay", false),
     USAGE("usage", false),
+    SCREEN("screen", false),
     BATTERY("battery", false);
 
     val titleKey get() = "perm.$key.title"
@@ -34,6 +36,7 @@ object Permissions {
         Perm.CONTACTS -> context.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
         Perm.OVERLAY -> Settings.canDrawOverlays(context)
         Perm.USAGE -> UsageWatcher.granted(context)
+        Perm.SCREEN -> InstallScreenWatcher.enabled(context)
         Perm.BATTERY -> context.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(context.packageName)
     }
 
@@ -53,6 +56,7 @@ object Permissions {
             Perm.LISTENER -> Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
             Perm.OVERLAY -> Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg)
             Perm.USAGE -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            Perm.SCREEN -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             // ONB-09: phone makers add their own battery screens; the standard request covers most.
             Perm.BATTERY -> Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, pkg)
             else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)

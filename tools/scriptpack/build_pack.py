@@ -65,6 +65,7 @@ fake_investment = {
         "entity:telegram": 0.4,
         "entity:amount": 0.2,
         "event:app_installed": 0.3,
+        "event:install_screen_opened": 0.3,
         "event:upi_link_opened": 0.4,
         "event:payment_app_opened": 0.2,
         "event:payment_sms": 0.2,
@@ -81,7 +82,7 @@ fake_investment = {
     "stages": [
         {"stage": "HOOK", "evidence": ["tag:guaranteed_returns", "tag:fake_social_proof", "tag:small_win_bait", "tag:exclusivity"], "minEvidence": 1.0},
         {"stage": "GROOMING", "evidence": ["tag:channel_move", "ctx:private_after_group", "ctx:cross_app", "tag:exclusivity", "tag:secrecy", "tag:urgency", "entity:telegram"], "minEvidence": 1.2},
-        {"stage": "COMMITMENT", "evidence": ["tag:install_request", "entity:apk_link", "check:install_source:fail", "event:app_installed"], "minEvidence": 1.2},
+        {"stage": "COMMITMENT", "evidence": ["tag:install_request", "entity:apk_link", "check:install_source:fail", "event:app_installed", "event:install_screen_opened"], "minEvidence": 1.2},
         {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "check:valid_handle:fail", "event:upi_link_opened", "entity:upi_handle", "event:payment_app_opened"], "minEvidence": 1.0},
         {"stage": "LOCK_IN", "evidence": ["tag:fee_to_withdraw", "ctx:repeat_payment"], "minEvidence": 1.5},
     ],
@@ -195,6 +196,7 @@ bank_kyc = {
         "entity:apk_link": 1.2,
         "ctx:kyc_mention": 1.2,
         "event:app_installed": 0.3,
+        "event:install_screen_opened": 0.3,
         "check:install_source:fail": 1.0,
         "check:lookalike:fail": 1.5,
         "event:remote_app_opened": 1.2,
@@ -208,7 +210,7 @@ bank_kyc = {
     "stages": [
         {"stage": "HOOK", "evidence": ["tag:authority_claim", "tag:legal_threat", "tag:urgency", "ctx:kyc_mention"], "minEvidence": 1.5},
         {"stage": "GROOMING", "evidence": ["tag:credential_request", "ctx:during_call"], "minEvidence": 1.0},
-        {"stage": "COMMITMENT", "evidence": ["tag:remote_access_request", "tag:install_request", "entity:apk_link", "event:remote_app_opened", "event:screen_share_started", "check:install_source:fail"], "minEvidence": 1.2},
+        {"stage": "COMMITMENT", "evidence": ["tag:remote_access_request", "tag:install_request", "entity:apk_link", "event:remote_app_opened", "event:screen_share_started", "check:install_source:fail", "event:install_screen_opened"], "minEvidence": 1.2},
         {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "event:payment_app_opened"], "minEvidence": 0.6},
     ],
     "hardRules": [
@@ -582,6 +584,7 @@ strings = {
     "timeline.group_added": L("Added to {group}", "{group} में जोड़ा गया"),
     "timeline.app_installed": L("Installed {app} from a link", "लिंक से {app} इंस्टॉल किया"),
     "timeline.payment": L("Payment to {handle}", "{handle} को भुगतान"),
+    "timeline.install_screen": L("Started installing {app} from a link", "लिंक से {app} इंस्टॉल करना शुरू किया"),
     "timeline.call": L("Call from a stranger", "अनजान नंबर से कॉल"),
     "timeline.video_call": L("Video call from a stranger", "अनजान नंबर से वीडियो कॉल"),
     "timeline.screen_share": L("Screen sharing started", "स्क्रीन शेयरिंग शुरू हुई"),

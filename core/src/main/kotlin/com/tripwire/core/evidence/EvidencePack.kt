@@ -92,7 +92,7 @@ class EvidencePackBuilder(private val pipeline: TripwirePipeline) {
                 EventType.CALL_STARTED -> explain.string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang)
                 EventType.CALL_ENDED -> null
                 EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED ->
-                    explain.string("timeline.app_installed", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: "")))
+                    explain.string(if (e.type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: "")))
                 EventType.PAYMENT_APP_OPENED -> explain.string("pack.payment_app_opened", lang, mapOf("app" to appLabel(e.app)))
                 EventType.UPI_LINK_OPENED -> explain.string("timeline.payment", lang, mapOf("handle" to (e.upi?.payeeHandle ?: "")))
                 EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> explain.string("timeline.screen_share", lang)

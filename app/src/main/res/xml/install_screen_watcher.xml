@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SIG-11: events only from the system installers. Never add android:isAccessibilityTool:
+    Tripwire is a fraud-prevention app, not an accessibility tool (PRD 15.3).
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowContentChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/install_screen_description"
+    android:notificationTimeout="200"
+    android:packageNames="com.google.android.packageinstaller,com.android.packageinstaller,com.miui.packageinstaller" />

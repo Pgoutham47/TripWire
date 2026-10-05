@@ -1,5 +1,7 @@
 package com.tripwire.core
 
+import com.tripwire.core.checks.CheckIds
+import com.tripwire.core.checks.CheckOutcome
 import com.tripwire.core.engine.ProgressionEngine
 import com.tripwire.core.engine.SignalHit
 import com.tripwire.core.evidence.AllyAlert
@@ -101,6 +103,36 @@ class PipelineBehaviourTest {
         assertTrue(d.show)
         assertTrue(d.warning!!.headline.startsWith("रुकिए"))
         assertTrue(d.warning!!.reasons.all { r -> r.any { it in 'ऀ'..'ॿ' } }, d.warning!!.reasons.toString())
+    }
+
+    /** The system install screen, as the on-screen reader reports it: a name, no package yet (SIG-11). */
+    private fun installScreen(label: String?) = Observation(
+        type = EventType.INSTALL_SCREEN_OPENED, app = "com.google.android.packageinstaller", timestamp = now, source = "screen",
+        installedLabel = label, installerPackage = "com.google.android.packageinstaller",
+    )
+
+    @Test
+    fun `the install screen warns before the app is installed, once`() {
+        replayRamesh(5)
+        now += 10 * 60_000
+        val before = pipeline.onMoment(installScreen("SATFIN Pro"))
+        assertTrue(before.show)
+        assertEquals(CheckOutcome.FAIL, before.checks.first { it.checkId == CheckIds.INSTALL_SOURCE }.outcome)
+        assertTrue(before.warning!!.timeline.any { it.label == "Started installing SATFIN Pro from a link" }, before.warning!!.timeline.toString())
+
+        // The same app finishing its install a moment later is the same warning, not a second one.
+        now += 20_000
+        val after = pipeline.onMoment(
+            Observation(type = EventType.APP_INSTALLED, app = "com.google.android.packageinstaller", timestamp = now, source = "package",
+                installedPackage = "com.satfin.pro", installedLabel = "SATFIN Pro", installerPackage = "com.google.android.packageinstaller"),
+        )
+        assertFalse(after.show)
+    }
+
+    @Test
+    fun `the install screen alone, with no suspicious chat, does not warn`() {
+        assertFalse(pipeline.onMoment(installScreen("Cricket Scores")).show)
+        assertFalse(pipeline.onMoment(installScreen(null)).show)
     }
 
     @Test

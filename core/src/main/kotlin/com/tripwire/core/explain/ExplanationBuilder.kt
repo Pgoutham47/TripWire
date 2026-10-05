@@ -187,7 +187,7 @@ class ExplanationBuilder(private val pack: ScriptPack) {
                 }
                 EventType.GROUP_ADDED -> string("timeline.group_added", lang, mapOf("group" to (e.groupName ?: ""))) to true
                 EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED ->
-                    string("timeline.app_installed", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: ""))) to true
+                    string(if (e.type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: ""))) to true
                 EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED ->
                     string("timeline.payment", lang, mapOf("handle" to (e.upi?.payeeHandle ?: ""))) to true
                 EventType.CALL_STARTED -> string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang) to true

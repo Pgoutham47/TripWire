@@ -79,6 +79,12 @@ object Ui {
         "perm.usage.title" to L("Usage access", "ऐप उपयोग की जानकारी"),
         "perm.usage.reason" to L("To know when a payment app opens.", "यह जानने के लिए कि पेमेंट ऐप कब खुला।"),
         "perm.usage.without" to L("Payment warnings only for links you open with Tripwire.", "सिर्फ़ Tripwire से खोले गए पेमेंट लिंक पर चेतावनी।"),
+        "perm.screen.title" to L("See the install screen", "इंस्टॉल स्क्रीन देखना"),
+        "perm.screen.reason" to L(
+            "Optional. Lets Tripwire warn you before a scam app is installed. It looks only at Android's install screen, never at your chats, passwords or other apps. In the next screen, open Tripwire and turn it on.",
+            "वैकल्पिक। इससे Tripwire धोखे वाला ऐप इंस्टॉल होने से पहले चेतावनी दे पाता है। यह सिर्फ़ Android की इंस्टॉल स्क्रीन देखता है, आपकी चैट, पासवर्ड या दूसरे ऐप कभी नहीं। अगली स्क्रीन में Tripwire खोलकर इसे चालू करें।",
+        ),
+        "perm.screen.without" to L("Warnings about scam apps come just after they install.", "धोखे वाले ऐप की चेतावनी इंस्टॉल होने के ठीक बाद आएगी।"),
         "perm.battery.title" to L("Keep running in the background", "बैकग्राउंड में चालू रहना"),
         "perm.battery.reason" to L("So your phone does not stop Tripwire.", "ताकि फ़ोन Tripwire को बंद न करे।"),
         "perm.battery.without" to L("The phone may stop Tripwire.", "फ़ोन Tripwire को बंद कर सकता है।"),
