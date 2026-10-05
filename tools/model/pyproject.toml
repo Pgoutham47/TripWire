@@ -1,0 +1,16 @@
+[project]
+name = "tripwire-model"
+version = "0.1.0"
+description = "Training and evaluation for Tripwire's on-device tactic reader (PRD 10.5-10.7)."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "torch>=2.6",
+    "transformers>=4.50",
+    "peft>=0.15",
+    "accelerate>=1.5",
+    "safetensors",
+    "huggingface_hub",
+]
+
+[tool.uv]
+package = false

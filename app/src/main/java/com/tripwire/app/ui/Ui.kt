@@ -1,0 +1,218 @@
+package com.tripwire.app.ui
+
+/**
+ * Every app-screen string, in every supported language (PRD 13.4, 14.6). Warning text comes from
+ * the script pack; these are the screens around it. The language is Tripwire's own setting, not
+ * the phone's, because the protector often sets up a parent's phone in a different language.
+ */
+object Ui {
+    val languages = listOf("en" to "English", "hi" to "हिन्दी")
+
+    fun t(key: String, lang: String, vararg params: Pair<String, String>): String {
+        val row = strings[key] ?: return key
+        var s = row[lang] ?: row["en"] ?: key
+        params.forEach { (k, v) -> s = s.replace("{$k}", v) }
+        return s
+    }
+
+    private fun L(en: String, hi: String) = mapOf("en" to en, "hi" to hi)
+
+    val strings: Map<String, Map<String, String>> = mapOf(
+        "app.name" to L("Tripwire", "Tripwire"),
+        "status.protecting" to L("Tripwire is protecting you", "Tripwire आपकी सुरक्षा कर रहा है"),
+        "status.paused" to L("Protection is paused", "सुरक्षा रुकी हुई है"),
+        "status.watching_cases" to L("Watching {n} suspicious chats", "{n} संदिग्ध चैट पर नज़र"),
+
+        // Onboarding (journey 1)
+        "welcome.l1" to L("Tripwire warns you before you pay a scammer.", "Tripwire आपको धोखेबाज़ को पैसे भेजने से पहले चेतावनी देता है।"),
+        "welcome.l2" to L("It reads messages from people who are not in your contacts, here on this phone.", "यह उन लोगों के मैसेज पढ़ता है जो आपके कॉन्टैक्ट में नहीं हैं, इसी फ़ोन पर।"),
+        "welcome.l3" to L("Your chats never leave this phone.", "आपकी चैट कभी इस फ़ोन से बाहर नहीं जातीं।"),
+        "btn.start" to L("Start", "शुरू करें"),
+        "lang.title" to L("Choose the language for warnings", "चेतावनियों की भाषा चुनें"),
+        "disclosure.title" to L("What Tripwire reads, and why", "Tripwire क्या पढ़ता है, और क्यों"),
+        "disclosure.notifications" to L(
+            "Messages from strangers in WhatsApp, Telegram and SMS, from their notifications. To spot scam patterns.",
+            "WhatsApp, Telegram और SMS में अनजान लोगों के मैसेज, उनकी नोटिफ़िकेशन से। धोखे के पैटर्न पहचानने के लिए।",
+        ),
+        "disclosure.contacts" to L(
+            "Your contacts list, only to tell strangers from people you know. Messages from contacts are ignored and never stored.",
+            "आपकी कॉन्टैक्ट लिस्ट, सिर्फ़ यह जानने के लिए कि कौन अनजान है। कॉन्टैक्ट के मैसेज न पढ़े जाते हैं, न रखे जाते हैं।",
+        ),
+        "disclosure.apps" to L(
+            "Which apps you install and open, to warn before a payment app or an app from a link.",
+            "आप कौन-से ऐप इंस्टॉल करते और खोलते हैं, ताकि पेमेंट ऐप या लिंक से आए ऐप से पहले चेतावनी दी जा सके।",
+        ),
+        "disclosure.payments" to L(
+            "Payment links you open with Tripwire, and payment SMS, to check the payment address and fill a complaint.",
+            "Tripwire से खोले गए पेमेंट लिंक और पेमेंट SMS, ताकि पेमेंट पता जाँचा जा सके और शिकायत भरी जा सके।",
+        ),
+        "disclosure.storage" to L(
+            "Everything stays on this phone, encrypted. Message text is deleted after 30 days. Nothing is sold or shared. Tripwire never asks for money or passwords.",
+            "सब कुछ इसी फ़ोन पर, सुरक्षित रूप से रहता है। मैसेज 30 दिन बाद हट जाते हैं। कुछ भी बेचा या साझा नहीं होता। Tripwire कभी पैसे या पासवर्ड नहीं माँगता।",
+        ),
+        "disclosure.consent_self" to L(
+            "If someone is setting this up for you: this is your phone, so you decide. Tap \"I agree\" only if you are happy with this.",
+            "अगर कोई और आपके लिए इसे सेट कर रहा है: फ़ोन आपका है, फ़ैसला आपका। सहमत हों तभी \"मैं सहमत हूँ\" दबाएँ।",
+        ),
+        "btn.agree" to L("I agree", "मैं सहमत हूँ"),
+        "btn.no_thanks" to L("No thanks", "नहीं, धन्यवाद"),
+        "disclosure.declined" to L(
+            "Tripwire cannot protect you without reading messages from strangers. You can come back any time.",
+            "अनजान लोगों के मैसेज पढ़े बिना Tripwire आपकी सुरक्षा नहीं कर सकता। आप कभी भी वापस आ सकते हैं।",
+        ),
+        "perm.title" to L("Permissions", "अनुमतियाँ"),
+        "perm.step" to L("Step {i} of {n}", "चरण {i} / {n}"),
+        "perm.without" to L("Without it: {what}", "इसके बिना: {what}"),
+        "perm.listener.title" to L("Read notifications", "नोटिफ़िकेशन पढ़ना"),
+        "perm.listener.reason" to L("Required. Lets Tripwire read messages from strangers.", "ज़रूरी। इससे Tripwire अनजान लोगों के मैसेज पढ़ पाता है।"),
+        "perm.listener.without" to L("Tripwire cannot detect anything.", "Tripwire कुछ भी नहीं पकड़ पाएगा।"),
+        "perm.post.title" to L("Show notifications", "नोटिफ़िकेशन दिखाना"),
+        "perm.post.reason" to L("To show notices and that protection is on.", "सूचनाएँ और सुरक्षा चालू होने की जानकारी दिखाने के लिए।"),
+        "perm.post.without" to L("You will not see notices.", "आपको सूचनाएँ नहीं दिखेंगी।"),
+        "perm.contacts.title" to L("Contacts", "कॉन्टैक्ट"),
+        "perm.contacts.reason" to L("To ignore messages from people you know.", "जान-पहचान वालों के मैसेज अनदेखा करने के लिए।"),
+        "perm.contacts.without" to L("Only senders shown as phone numbers count as strangers.", "सिर्फ़ फ़ोन नंबर से दिखने वाले लोग ही अनजान माने जाएँगे।"),
+        "perm.overlay.title" to L("Display over other apps", "दूसरे ऐप के ऊपर दिखाना"),
+        "perm.overlay.reason" to L("To show the warning on top of a payment app.", "पेमेंट ऐप के ऊपर चेतावनी दिखाने के लिए।"),
+        "perm.overlay.without" to L("The warning comes as an urgent notification instead.", "चेतावनी ज़रूरी नोटिफ़िकेशन के रूप में आएगी।"),
+        "perm.usage.title" to L("Usage access", "ऐप उपयोग की जानकारी"),
+        "perm.usage.reason" to L("To know when a payment app opens.", "यह जानने के लिए कि पेमेंट ऐप कब खुला।"),
+        "perm.usage.without" to L("Payment warnings only for links you open with Tripwire.", "सिर्फ़ Tripwire से खोले गए पेमेंट लिंक पर चेतावनी।"),
+        "perm.battery.title" to L("Keep running in the background", "बैकग्राउंड में चालू रहना"),
+        "perm.battery.reason" to L("So your phone does not stop Tripwire.", "ताकि फ़ोन Tripwire को बंद न करे।"),
+        "perm.battery.without" to L("The phone may stop Tripwire.", "फ़ोन Tripwire को बंद कर सकता है।"),
+        "btn.allow" to L("Allow", "अनुमति दें"),
+        "btn.skip" to L("Skip", "छोड़ें"),
+        "btn.next" to L("Next", "आगे"),
+        "btn.back" to L("Back", "पीछे"),
+        "perm.granted" to L("Allowed", "अनुमति मिली"),
+        "ally.title" to L("Choose a trusted person", "एक भरोसेमंद व्यक्ति चुनें"),
+        "ally.body" to L(
+            "If Tripwire shows a serious warning, it can text them. They see the type of scam and the time. They never see your messages or who you talked to.",
+            "गंभीर चेतावनी पर Tripwire उन्हें मैसेज भेज सकता है। उन्हें सिर्फ़ धोखे का प्रकार और समय दिखेगा। आपके मैसेज या आपने किससे बात की, यह कभी नहीं।",
+        ),
+        "btn.pick_contact" to L("Choose from contacts", "कॉन्टैक्ट से चुनें"),
+        "ally.chosen" to L("Trusted person: {name}", "भरोसेमंद व्यक्ति: {name}"),
+        "owner.name" to L("Your name (used in alerts and complaints)", "आपका नाम (अलर्ट और शिकायत में)"),
+        "done.title" to L("Tripwire is watching", "Tripwire नज़र रख रहा है"),
+        "done.body" to L(
+            "You will see nothing until something matches a known scam. Try a sample warning now.",
+            "जब तक कुछ किसी जाने-पहचाने धोखे से मेल न खाए, आपको कुछ नहीं दिखेगा। अभी एक नमूना चेतावनी देखें।",
+        ),
+        "btn.test_warning" to L("Show a sample warning", "नमूना चेतावनी दिखाएँ"),
+        "btn.finish" to L("Done", "हो गया"),
+
+        // Home
+        "home.missing" to L("Some protection is off", "कुछ सुरक्षा बंद है"),
+        "home.cases" to L("Watching {n} suspicious chats", "{n} संदिग्ध चैट पर नज़र"),
+        "home.no_cases" to L("No suspicious chats right now", "अभी कोई संदिग्ध चैट नहीं"),
+        "home.model" to L("On-device AI: {state}", "फ़ोन पर AI: {state}"),
+        "model.ready" to L("ready", "तैयार"),
+        "model.rules" to L("keyword rules (no model file yet)", "कीवर्ड नियम (मॉडल फ़ाइल अभी नहीं)"),
+        "model.loading" to L("loading", "लोड हो रहा है"),
+        "model.failed" to L("could not load, using keyword rules", "लोड नहीं हुआ, कीवर्ड नियम चल रहे हैं"),
+        "model.downloading" to L("downloading {p}%", "डाउनलोड {p}%"),
+        "home.recent" to L("Recent warnings", "हाल की चेतावनियाँ"),
+        "home.offline" to L("Works offline. Nothing you read here leaves this phone.", "बिना इंटरनेट काम करता है। यहाँ की कोई जानकारी फ़ोन से बाहर नहीं जाती।"),
+        "btn.already_paid" to L("I already paid", "मैंने भुगतान कर दिया"),
+        "btn.turn_on" to L("Turn on", "चालू करें"),
+        "btn.cases" to L("Watched chats", "निगरानी वाली चैट"),
+        "btn.settings" to L("Settings", "सेटिंग"),
+        "btn.learn" to L("Learn the scams", "धोखों के बारे में जानें"),
+
+        // Cases and timeline
+        "cases.title" to L("Watched chats", "निगरानी वाली चैट"),
+        "cases.empty" to L("Nothing suspicious yet.", "अभी तक कुछ संदिग्ध नहीं।"),
+        "risk.low" to L("Low risk", "कम जोखिम"),
+        "risk.medium" to L("Watch out", "सावधान"),
+        "risk.high" to L("High risk", "ज़्यादा जोखिम"),
+        "timeline.title" to L("Why Tripwire is watching", "Tripwire क्यों नज़र रख रहा है"),
+        "timeline.matches" to L("Matches a known {family} pattern", "एक जाने-पहचाने {family} पैटर्न से मेल"),
+        "timeline.stage" to L("Stage: {stage}", "चरण: {stage}"),
+        "timeline.deleted" to L("(text deleted)", "(मैसेज हटाया गया)"),
+        "timeline.contact" to L("Stranger contacted you", "अनजान व्यक्ति ने संपर्क किया"),
+        "btn.mark_trusted" to L("Mark as trusted", "भरोसेमंद मानें"),
+        "btn.delete" to L("Delete", "हटाएँ"),
+        "confirm.trusted" to L("Stop watching this chat and delete its messages?", "इस चैट पर नज़र रखना बंद करें और इसके मैसेज हटाएँ?"),
+        "confirm.delete" to L("Delete this chat's record from Tripwire?", "Tripwire से इस चैट का रिकॉर्ड हटाएँ?"),
+        "btn.yes" to L("Yes", "हाँ"),
+        "btn.cancel" to L("Cancel", "रद्द करें"),
+
+        // "I already paid" (journey 8)
+        "paid.title" to L("I already paid", "मैंने भुगतान कर दिया"),
+        "paid.which" to L("Which chat was it?", "कौन-सी चैट थी?"),
+        "paid.none" to L("Not in this list", "इस सूची में नहीं"),
+        "paid.amount" to L("Amount in ₹", "राशि (₹)"),
+        "paid.minutes_ago" to L("How many minutes ago did you pay?", "कितने मिनट पहले भुगतान किया?"),
+        "paid.utr" to L("Transaction reference (UTR)", "ट्रांज़ैक्शन रेफ़रेंस (UTR)"),
+        "paid.handle" to L("Paid to (UPI address)", "किसे भेजा (UPI पता)"),
+        "paid.prefilled" to L("Filled from your bank SMS. Check it.", "बैंक SMS से भरा गया। जाँच लें।"),
+        "paid.countdown" to L("{m} minutes left in the first hour. Banks can most often freeze money now.", "पहले घंटे में {m} मिनट बाकी। अभी बैंक अक्सर पैसा रोक सकते हैं।"),
+        "paid.expired" to L("The first hour has passed. Report anyway: money can still be traced.", "पहला घंटा निकल गया। फिर भी शिकायत करें: पैसा अब भी ट्रेस हो सकता है।"),
+        "btn.call_1930" to L("Call 1930 now", "अभी 1930 पर कॉल करें"),
+        "btn.build_pack" to L("Make complaint pack", "शिकायत पैक बनाएँ"),
+        "btn.share_pack" to L("Share complaint pack", "शिकायत पैक भेजें"),
+        "btn.portal" to L("Open cybercrime.gov.in", "cybercrime.gov.in खोलें"),
+        "paid.script" to L("What to say on the call", "कॉल पर क्या कहें"),
+        "paid.next" to L("Next steps", "आगे क्या करें"),
+        "paid.next1" to L("Call your bank's fraud line and ask them to block the transfer.", "अपने बैंक की फ़्रॉड लाइन पर कॉल करके ट्रांसफ़र रोकने को कहें।"),
+        "paid.next2" to L("Do not pay any \"recovery fee\". Recovery offers are a second scam.", "कोई \"रिकवरी फ़ीस\" न दें। पैसा वापस दिलाने के वादे दूसरा धोखा हैं।"),
+        "paid.next3" to L("Keep the phone and the chats as they are. Do not delete anything.", "फ़ोन और चैट जैसे हैं वैसे रखें। कुछ भी न हटाएँ।"),
+        "paid.next4" to L("Block the payment address in your UPI app.", "अपने UPI ऐप में उस पेमेंट पते को ब्लॉक करें।"),
+        "paid.pack_ready" to L("Complaint pack saved.", "शिकायत पैक सेव हो गया।"),
+
+        // Settings
+        "settings.title" to L("Settings", "सेटिंग"),
+        "settings.language" to L("Language", "भाषा"),
+        "settings.speech" to L("Read warnings aloud", "चेतावनी बोलकर सुनाएँ"),
+        "settings.retention" to L("Keep message text for", "मैसेज कितने दिन रखें"),
+        "settings.days" to L("{n} days", "{n} दिन"),
+        "settings.pause" to L("Pause protection", "सुरक्षा रोकें"),
+        "settings.pause_hour" to L("For one hour", "एक घंटे के लिए"),
+        "settings.pause_tomorrow" to L("Until tomorrow", "कल तक"),
+        "settings.resume" to L("Resume now", "अभी चालू करें"),
+        "settings.collectors" to L("What Tripwire watches", "Tripwire किस पर नज़र रखता है"),
+        "collector.message" to L("Messages from strangers", "अनजान लोगों के मैसेज"),
+        "collector.app_installed" to L("App installs", "ऐप इंस्टॉल"),
+        "collector.payment_app_opened" to L("Payment apps opening", "पेमेंट ऐप खुलना"),
+        "collector.call_started" to L("Calls from strangers", "अनजान नंबर से कॉल"),
+        "collector.remote_app_opened" to L("Screen-sharing apps", "स्क्रीन शेयर करने वाले ऐप"),
+        "settings.allies" to L("Trusted person", "भरोसेमंद व्यक्ति"),
+        "settings.no_ally" to L("None chosen", "कोई नहीं चुना"),
+        "btn.remove" to L("Remove", "हटाएँ"),
+        "settings.share" to L("Share anonymous scam patterns", "गुमनाम धोखा-पैटर्न साझा करें"),
+        "settings.share_body" to L("Only the order of tactics and the outcome. Never text, names, numbers or amounts. Off by default.", "सिर्फ़ तरीकों का क्रम और नतीजा। कभी मैसेज, नाम, नंबर या राशि नहीं। पहले से बंद।"),
+        "settings.delete_all" to L("Delete all Tripwire data", "Tripwire का सारा डेटा हटाएँ"),
+        "confirm.delete_all" to L("This deletes every record, case and complaint pack on this phone. It cannot be undone.", "इससे इस फ़ोन पर हर रिकॉर्ड, मामला और शिकायत पैक हट जाएगा। यह वापस नहीं होगा।"),
+        "settings.model" to L("On-device AI model", "फ़ोन पर AI मॉडल"),
+        "settings.model_hint" to L("Copy a .litertlm model file to {path}, or download it over Wi-Fi.", ".litertlm मॉडल फ़ाइल {path} में रखें, या Wi-Fi पर डाउनलोड करें।"),
+        "btn.reload_model" to L("Look for the model file again", "मॉडल फ़ाइल फिर से खोजें"),
+        "btn.download_model" to L("Download model (Wi-Fi)", "मॉडल डाउनलोड करें (Wi-Fi)"),
+        "settings.demo" to L("Demo: replay a scam on this phone", "डेमो: इस फ़ोन पर एक धोखा दोहराएँ"),
+        "settings.demo_body" to L("Plays a recorded scam through Tripwire without touching your real records.", "आपके असली रिकॉर्ड को छुए बिना एक रिकॉर्ड किया हुआ धोखा चलाता है।"),
+        "settings.disable_warning" to L("Turning this off during an active case alerts your trusted person.", "चल रहे मामले के दौरान इसे बंद करने पर आपके भरोसेमंद व्यक्ति को सूचना जाएगी।"),
+
+        // Warning screen
+        "warning.brand" to L("Tripwire warning", "Tripwire चेतावनी"),
+        "warning.what_happened" to L("What happened", "क्या हुआ"),
+        "warning.hold" to L("Keep holding…", "दबाए रखें…"),
+        "warning.replay" to L("Read aloud again", "फिर से सुनाएँ"),
+        "warning.already_paid" to L("I already paid", "मैंने भुगतान कर दिया"),
+        "warning.trusted" to L("I know this person", "मैं इन्हें जानता/जानती हूँ"),
+        "warning.feedback" to L("Was this a scam?", "क्या यह धोखा था?"),
+        "feedback.yes" to L("Yes", "हाँ"),
+        "feedback.no" to L("No", "नहीं"),
+        "feedback.not_sure" to L("Not sure", "पता नहीं"),
+        "warning.thanks" to L("Thank you. Tripwire learns from your answer.", "धन्यवाद। Tripwire आपके जवाब से सीखता है।"),
+        "checkin.title" to L("Are you okay?", "क्या सब ठीक है?"),
+        "checkin.body" to L("You went ahead after a scam warning an hour ago. If money is gone, tap here now.", "एक घंटे पहले चेतावनी के बाद भी आप आगे बढ़े। अगर पैसा चला गया है, तो अभी यहाँ टैप करें।"),
+        "sample.headline" to L("This is a sample. A real warning looks like this.", "यह एक नमूना है। असली चेतावनी ऐसी दिखती है।"),
+
+        // Ally alerts
+        "ally.sent" to L("Your trusted person was told: {text}", "आपके भरोसेमंद व्यक्ति को बताया गया: {text}"),
+        "ally.tap_to_send" to L("Tap to text {ally} about this", "{ally} को इसके बारे में मैसेज भेजने के लिए टैप करें"),
+
+        // Learn (UI-06)
+        "learn.title" to L("Scams Tripwire knows", "Tripwire किन धोखों को पहचानता है"),
+    )
+}

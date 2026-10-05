@@ -1,0 +1,14 @@
+[project]
+name = "tripwire-model-convert"
+version = "0.1.0"
+description = "Converts the fine-tuned tactic reader to LiteRT-LM (PRD 10.6 steps 2-3)."
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "litert-torch>=0.9.4",
+    "litert-lm>=0.17.1",
+    "transformers",
+    "safetensors",
+]
+
+[tool.uv]
+package = false

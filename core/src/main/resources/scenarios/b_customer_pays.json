@@ -1,0 +1,34 @@
+{
+ "id": "b_customer_pays",
+ "description": "A new customer of a small business: the stranger pays the user.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Hi, I want to order 2 chocolate cakes for Saturday. What's your UPI id? I'll pay ₹1,200 advance now.",
+    "senderName": "+91 90000 00105",
+    "senderPhone": "+919000000105"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 10,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Paid ₹1,200, please check and confirm the order.",
+    "senderName": "+91 90000 00105",
+    "senderPhone": "+919000000105"
+   },
+   "expectNotice": false
+  }
+ ]
+}

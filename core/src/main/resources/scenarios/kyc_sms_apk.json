@@ -1,0 +1,34 @@
+{
+ "id": "kyc_sms_apk",
+ "description": "Bank KYC impersonation by SMS with an app link.",
+ "family": "bank_kyc",
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Dear customer, your SBI account will be blocked today. Update KYC immediately by installing our KYC app: https://sbi-kyc-update.top/kyc.apk",
+    "senderName": "+91 90000 00066",
+    "senderPhone": "+919000000066"
+   },
+   "expectStageAtLeast": "COMMITMENT"
+  },
+  {
+   "t": 15,
+   "obs": {
+    "type": "app_installed",
+    "app": "com.android.chrome",
+    "timestamp": 0,
+    "source": "package",
+    "installedPackage": "com.kyc.update.sbi",
+    "installedLabel": "SBI KYC Update",
+    "installerPackage": "com.android.chrome"
+   },
+   "expectWarning": true
+  }
+ ]
+}

@@ -1,0 +1,69 @@
+{
+ "id": "da_cbi_screen_share",
+ "description": "English digital arrest: drugs in a parcel, arrest threat, a video call, a request to share the screen.",
+ "family": "digital_arrest",
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "This is CBI cyber cell. A parcel in your name with drugs was found at Mumbai customs. A non-bailable warrant has been issued.",
+    "senderName": "+91 90000 00044",
+    "senderPhone": "+919000000044"
+   },
+   "expectStageAtLeast": "HOOK"
+  },
+  {
+   "t": 3,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Do not tell your family. This is a secret investigation. Join the video call now.",
+    "senderName": "+91 90000 00044",
+    "senderPhone": "+919000000044"
+   },
+   "expectNotice": true
+  },
+  {
+   "t": 5,
+   "obs": {
+    "type": "call_started",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "call",
+    "senderPhone": "+919000000044",
+    "senderName": "+919000000044",
+    "isVideoCall": true
+   },
+   "expectWarning": true
+  },
+  {
+   "t": 20,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Share your screen so we can verify your bank accounts are not linked to the case.",
+    "senderName": "+91 90000 00044",
+    "senderPhone": "+919000000044"
+   }
+  },
+  {
+   "t": 22,
+   "obs": {
+    "type": "screen_share_started",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "screen"
+   },
+   "expectWarning": true
+  }
+ ]
+}

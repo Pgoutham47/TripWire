@@ -1,0 +1,34 @@
+{
+ "id": "b_recruiter",
+ "description": "A real recruiter: stranger, offers a job, never asks for money.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Hi, I'm Neha from TalentBridge. We have a Java developer opening in Pune. Can you share your updated resume?",
+    "senderName": "+91 90000 00101",
+    "senderPhone": "+919000000101"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 1440,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Thanks! Your interview is scheduled tomorrow at 11 am on Google Meet. Link will come by email.",
+    "senderName": "+91 90000 00101",
+    "senderPhone": "+919000000101"
+   },
+   "expectNotice": false
+  }
+ ]
+}

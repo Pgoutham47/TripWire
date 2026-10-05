@@ -1,0 +1,32 @@
+{
+ "id": "b_delivery",
+ "description": "Delivery and OTP messages from an unknown sender.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Your order #40512 is out for delivery. Share OTP 4567 with the delivery agent only.",
+    "senderName": "AX-DLVERY"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 120,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Your order #40512 has been delivered. Rate your experience.",
+    "senderName": "AX-DLVERY"
+   },
+   "expectNotice": false
+  }
+ ]
+}

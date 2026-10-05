@@ -1,0 +1,81 @@
+{
+ "id": "fi_telegram_to_whatsapp",
+ "description": "English stock-tips Telegram group hands off to WhatsApp, then a payment app opens within minutes.",
+ "family": "fake_investment",
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "group_added",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Priya Analyst added you",
+    "senderName": "Priya Analyst",
+    "groupName": "NSE Profit Masters"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 60,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Members made ₹85,000 yesterday with our call. Fixed daily 5% profit, no risk.",
+    "senderName": "Priya Analyst",
+    "groupName": "NSE Profit Masters"
+   }
+  },
+  {
+   "t": 1440,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Limited 10 seats in our institutional account. WhatsApp me at +91 90000 00022 for VIP access.",
+    "senderName": "Priya Analyst",
+    "groupName": "NSE Profit Masters"
+   },
+   "expectNotice": true,
+   "expectStageAtLeast": "GROOMING"
+  },
+  {
+   "t": 1470,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Hello, this is Priya from NSE Profit Masters. Your VIP slot is reserved, confirm within 2 hours.",
+    "senderName": "+91 90000 00022",
+    "senderPhone": "+919000000022"
+   }
+  },
+  {
+   "t": 1480,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Minimum deposit is ₹50,000. Pay to our UPI and the profit shows in your dashboard.",
+    "senderName": "+91 90000 00022",
+    "senderPhone": "+919000000022"
+   }
+  },
+  {
+   "t": 1485,
+   "obs": {
+    "type": "payment_app_opened",
+    "app": "com.google.android.apps.nbu.paisa.user",
+    "timestamp": 0,
+    "source": "usage"
+   },
+   "expectWarning": true
+  }
+ ]
+}

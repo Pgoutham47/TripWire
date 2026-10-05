@@ -1,0 +1,34 @@
+{
+ "id": "b_jobs_channel",
+ "description": "A real jobs group on Telegram.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "group_added",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Admin added you",
+    "senderName": "Admin",
+    "groupName": "Python Jobs India"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 60,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Hiring: backend intern at a Bengaluru startup, stipend ₹15,000 per month. Apply on the company careers page.",
+    "senderName": "Admin",
+    "groupName": "Python Jobs India"
+   },
+   "expectNotice": false
+  }
+ ]
+}

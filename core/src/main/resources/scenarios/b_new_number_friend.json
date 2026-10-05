@@ -1,0 +1,34 @@
+{
+ "id": "b_new_number_friend",
+ "description": "A family friend on a new number asks about a wedding.",
+ "family": null,
+ "language": "hi-Latn",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Namaste uncle, main Ravi ka dost hoon, ye mera naya number hai. Shaadi ka card aapko mil gaya kya?",
+    "senderName": "+91 90000 00108",
+    "senderPhone": "+919000000108"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 30,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Haan ji, function Sunday ko hai, aap zaroor aaiye.",
+    "senderName": "+91 90000 00108",
+    "senderPhone": "+919000000108"
+   },
+   "expectNotice": false
+  }
+ ]
+}

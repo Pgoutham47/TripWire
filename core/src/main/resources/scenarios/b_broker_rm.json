@@ -1,0 +1,52 @@
+{
+ "id": "b_broker_rm",
+ "description": "A real broker's relationship manager; payment to a SEBI @valid handle.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Hello sir, I am your relationship manager from Zerodha. You can apply for the new IPO from the Kite app. Returns depend on market conditions.",
+    "senderName": "Amit RM",
+    "senderPhone": "+919000000102"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 60,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "For your SIP top-up, please pay only through the app or our validated UPI handle zerodha.brk@validhdfc.",
+    "senderName": "Amit RM",
+    "senderPhone": "+919000000102"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 70,
+   "obs": {
+    "type": "upi_link_opened",
+    "app": "com.tripwire.app",
+    "timestamp": 0,
+    "source": "upi_link",
+    "upi": {
+     "payeeHandle": "zerodha.brk@validhdfc",
+     "payeeName": "Zerodha Broking",
+     "amount": {
+      "paise": 1000000
+     },
+     "rawUri": "upi://pay?pa=zerodha.brk@validhdfc&pn=Zerodha%20Broking&am=10000&cu=INR"
+    }
+   },
+   "expectWarning": false
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "id": "b_courier_legit",
+ "description": "A real courier update, then an unrelated Play Store install and a shop payment.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Your parcel will be delivered today between 2-5 pm. Track it at bluedart.com",
+    "senderName": "BX-BLUDRT"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 30,
+   "obs": {
+    "type": "app_installed",
+    "app": "com.android.vending",
+    "timestamp": 0,
+    "source": "package",
+    "installedPackage": "com.swiggy.android",
+    "installedLabel": "Swiggy",
+    "installerPackage": "com.android.vending"
+   },
+   "expectWarning": false
+  },
+  {
+   "t": 60,
+   "obs": {
+    "type": "upi_link_opened",
+    "app": "com.tripwire.app",
+    "timestamp": 0,
+    "source": "upi_link",
+    "upi": {
+     "payeeHandle": "chaiwala.tripwiredemo@okicici",
+     "payeeName": "Chai Point",
+     "amount": {
+      "paise": 4000
+     },
+     "rawUri": "upi://pay?pa=chaiwala.tripwiredemo@okicici&pn=Chai%20Point&am=40&cu=INR"
+    }
+   },
+   "expectWarning": false
+  }
+ ]
+}

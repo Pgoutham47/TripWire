@@ -1,0 +1,121 @@
+{
+ "id": "fi_ramesh_hinglish",
+ "description": "The PRD 4 story: added to an IPO group, fake profits, private Hinglish pitch, app from a link, payment to a non-@valid handle.",
+ "family": "fake_investment",
+ "language": "hi-Latn",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "group_added",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "~ Rahul Mehta added you",
+    "senderName": "~ Rahul Mehta",
+    "groupName": "Elite IPO Club 88",
+    "senderPhone": "+919000000011"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 2880,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Today's profit: our members booked ₹4.2 lakh profit 🚀 Thank you sir for the tips",
+    "senderName": "~ Vikas",
+    "senderPhone": "+919000000012",
+    "groupName": "Elite IPO Club 88"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 2885,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Guaranteed 30% returns in 10 days. Pre-IPO allotment only for VIP members.",
+    "senderName": "~ Rahul Mehta",
+    "senderPhone": "+919000000011",
+    "groupName": "Elite IPO Club 88"
+   },
+   "expectStageAtLeast": "HOOK"
+  },
+  {
+   "t": 4320,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Sir aapka allotment confirm hai, bas aaj hi karna padega, kisi ko mat batana",
+    "senderName": "~ Rahul Mehta",
+    "senderPhone": "+919000000011"
+   },
+   "expectNotice": true,
+   "expectStageAtLeast": "GROOMING"
+  },
+  {
+   "t": 5760,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Download our SATFIN Pro app from this link https://satfin-pro.top/download/SATFINPro.apk and register with your mobile number",
+    "senderName": "~ Rahul Mehta",
+    "senderPhone": "+919000000011"
+   },
+   "expectStageAtLeast": "COMMITMENT"
+  },
+  {
+   "t": 5770,
+   "obs": {
+    "type": "app_installed",
+    "app": "com.google.android.packageinstaller",
+    "timestamp": 0,
+    "source": "package",
+    "installedPackage": "com.satfin.pro",
+    "installedLabel": "SATFIN Pro",
+    "installerPackage": "com.google.android.packageinstaller"
+   },
+   "expectWarning": true
+  },
+  {
+   "t": 8640,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Deposit ₹2,00,000 to satfin.tripwiredemo@ybl to activate your IPO allotment. Only today.",
+    "senderName": "~ Rahul Mehta",
+    "senderPhone": "+919000000011"
+   }
+  },
+  {
+   "t": 8645,
+   "obs": {
+    "type": "upi_link_opened",
+    "app": "com.tripwire.app",
+    "timestamp": 0,
+    "source": "upi_link",
+    "upi": {
+     "payeeHandle": "satfin.tripwiredemo@ybl",
+     "payeeName": "SATFIN Trading",
+     "amount": {
+      "paise": 20000000
+     },
+     "rawUri": "upi://pay?pa=satfin.tripwiredemo@ybl&pn=SATFIN%20Trading&am=200000&cu=INR"
+    }
+   },
+   "expectWarning": true,
+   "expectStageAtLeast": "EXTRACTION"
+  }
+ ]
+}

@@ -1,0 +1,96 @@
+{
+ "id": "da_sarojini_hindi",
+ "description": "Digital arrest in Hindi: a call, threats by message, a video call, then a payment app opened during the call.",
+ "family": "digital_arrest",
+ "language": "hi",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "call_started",
+    "app": "com.android.dialer",
+    "timestamp": 0,
+    "source": "call",
+    "senderPhone": "+919000000033",
+    "senderName": "+919000000033",
+    "isVideoCall": false
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 2,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "मैं मुंबई क्राइम ब्रांच से बोल रहा हूँ। आपके आधार से मनी लॉन्ड्रिंग का केस दर्ज हुआ है। आपके नाम गिरफ्तारी वारंट जारी है।",
+    "senderName": "+919000000033",
+    "senderPhone": "+919000000033"
+   },
+   "expectStageAtLeast": "HOOK"
+  },
+  {
+   "t": 6,
+   "obs": {
+    "type": "call_ended",
+    "app": "com.android.dialer",
+    "timestamp": 0,
+    "source": "call",
+    "senderPhone": "+919000000033",
+    "senderName": "+919000000033",
+    "isVideoCall": false
+   }
+  },
+  {
+   "t": 10,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "तुरंत वीडियो कॉल पर जुड़ें। किसी को मत बताना, यह गुप्त जाँच है।",
+    "senderName": "+919000000033",
+    "senderPhone": "+919000000033"
+   },
+   "expectNotice": true,
+   "expectStageAtLeast": "GROOMING"
+  },
+  {
+   "t": 12,
+   "obs": {
+    "type": "call_started",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "call",
+    "senderPhone": "+919000000033",
+    "senderName": "+919000000033",
+    "isVideoCall": true
+   },
+   "expectWarning": true
+  },
+  {
+   "t": 40,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "अपने सारे पैसे RBI सुरक्षित खाते में ट्रांसफर करें: rbi.verify.tripwiredemo@okaxis",
+    "senderName": "+919000000033",
+    "senderPhone": "+919000000033"
+   }
+  },
+  {
+   "t": 45,
+   "obs": {
+    "type": "payment_app_opened",
+    "app": "com.phonepe.app",
+    "timestamp": 0,
+    "source": "usage"
+   },
+   "expectWarning": true,
+   "expectStageAtLeast": "EXTRACTION"
+  }
+ ]
+}

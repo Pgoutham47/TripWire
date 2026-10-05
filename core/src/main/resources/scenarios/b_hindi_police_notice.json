@@ -1,0 +1,20 @@
+{
+ "id": "b_hindi_police_notice",
+ "description": "A real police-related message: verification visit, no money, no video call.",
+ "family": null,
+ "language": "hi",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "com.google.android.apps.messaging",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "पासपोर्ट सत्यापन के लिए पुलिस कल सुबह 10 बजे आपके पते पर आएगी। कृपया पहचान पत्र तैयार रखें।",
+    "senderName": "VK-PSPORT"
+   },
+   "expectNotice": false
+  }
+ ]
+}

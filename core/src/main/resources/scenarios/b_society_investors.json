@@ -1,0 +1,64 @@
+{
+ "id": "b_society_investors",
+ "description": "A genuine investing group among acquaintances.",
+ "family": null,
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "group_added",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Mr Sharma added you",
+    "senderName": "Mr Sharma",
+    "groupName": "Society Investors Club",
+    "senderPhone": "+919000000106"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 30,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Did anyone buy the Tata Motors dip today?",
+    "senderName": "Mr Sharma",
+    "senderPhone": "+919000000106",
+    "groupName": "Society Investors Club"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 40,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "I'm holding long term. Returns were decent this year but markets are volatile.",
+    "senderName": "Mrs Iyer",
+    "senderPhone": "+919000000107",
+    "groupName": "Society Investors Club"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 60,
+   "obs": {
+    "type": "message",
+    "app": "com.whatsapp",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Let's discuss SIPs and index funds at the meetup on Sunday.",
+    "senderName": "Mr Sharma",
+    "senderPhone": "+919000000106",
+    "groupName": "Society Investors Club"
+   },
+   "expectNotice": false
+  }
+ ]
+}

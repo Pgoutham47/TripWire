@@ -1,0 +1,88 @@
+{
+ "id": "task_priya_telegram",
+ "description": "Task scam: small payouts for likes, then prepaid tasks and a withdrawal tax.",
+ "family": "task_scam",
+ "language": "en",
+ "steps": [
+  {
+   "t": 0,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Part time job: earn ₹150 per task by liking YouTube videos. Work from home, daily payment.",
+    "senderName": "HR Ananya",
+    "senderPhone": "+919000000055"
+   },
+   "expectNotice": false
+  },
+  {
+   "t": 30,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "₹150 credited for your first task. Join our Telegram channel t.me/tripwiredemo_tasks for more.",
+    "senderName": "HR Ananya",
+    "senderPhone": "+919000000055"
+   }
+  },
+  {
+   "t": 1440,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Prepaid task: pay ₹1,000 to our UPI and get ₹1,500 back in 30 minutes.",
+    "senderName": "HR Ananya",
+    "senderPhone": "+919000000055"
+   }
+  },
+  {
+   "t": 1500,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "Pay ₹5,000 for the next task to receive your ₹7,500 commission.",
+    "senderName": "HR Ananya",
+    "senderPhone": "+919000000055"
+   }
+  },
+  {
+   "t": 2880,
+   "obs": {
+    "type": "message",
+    "app": "org.telegram.messenger",
+    "timestamp": 0,
+    "source": "notification",
+    "text": "To withdraw your ₹12,000 you must pay 18% tax first.",
+    "senderName": "HR Ananya",
+    "senderPhone": "+919000000055"
+   },
+   "expectStageAtLeast": "EXTRACTION"
+  },
+  {
+   "t": 2890,
+   "obs": {
+    "type": "upi_link_opened",
+    "app": "com.tripwire.app",
+    "timestamp": 0,
+    "source": "upi_link",
+    "upi": {
+     "payeeHandle": "tasks.tripwiredemo@ybl",
+     "payeeName": "Ananya Services",
+     "amount": {
+      "paise": 216000
+     },
+     "rawUri": "upi://pay?pa=tasks.tripwiredemo@ybl&pn=Ananya%20Services&am=2160&cu=INR"
+    }
+   },
+   "expectWarning": true
+  }
+ ]
+}
