@@ -30,11 +30,16 @@ class UpiLinkActivity : ComponentActivity() {
             return
         }
         val graph = applicationContext.graph
+        // Where the link was tapped, when that is a chat, payment or browser app; otherwise it is
+        // shown simply as a "UPI link", never as a raw system package.
+        val apps = graph.pack.apps
+        val known = (apps.messaging + apps.payment).map { it.packageName }.toSet() + apps.linkInstallers
+        val from = referrer?.host?.takeIf { it in known } ?: packageName
         lifecycleScope.launch {
             val decision = graph.guardian.decide(
                 Observation(
                     type = EventType.UPI_LINK_OPENED,
-                    app = referrer?.host ?: packageName,
+                    app = from,
                     timestamp = System.currentTimeMillis(),
                     source = "upi_link",
                     upi = payment,

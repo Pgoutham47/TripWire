@@ -125,6 +125,7 @@ object Ui {
         "checkup.look_one" to L("1 app to look at", "1 ऐप देख लें"),
         "checkup.look" to L("{n} apps to look at", "{n} ऐप देख लें"),
         "checkup.clean" to L("No risky apps found", "कोई ख़तरनाक ऐप नहीं मिला"),
+        "checkup.checked_one" to L("Checked the 1 app you installed. Nothing leaves this phone.", "आपका इंस्टॉल किया 1 ऐप जाँचा। कुछ भी फ़ोन से बाहर नहीं जाता।"),
         "checkup.checked" to L("Checked {n} apps you installed. Nothing leaves this phone.", "आपके इंस्टॉल किए {n} ऐप जाँचे। कुछ भी फ़ोन से बाहर नहीं जाता।"),
         "checkup.outside_only" to L("{n} of them came from outside an app store, but none of these can read your SMS or notifications, or control your screen.", "इनमें से {n} ऐप स्टोर के बाहर से आए हैं, पर इनमें से कोई आपके SMS या नोटिफ़िकेशन नहीं पढ़ सकता, न ही स्क्रीन चला सकता है।"),
         "checkup.badge_severe" to L("Risky", "ख़तरनाक"),

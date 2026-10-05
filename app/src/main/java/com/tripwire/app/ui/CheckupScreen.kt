@@ -105,7 +105,10 @@ fun CheckupScreen(vm: AppViewModel, onBack: () -> Unit) {
                     modifier = Modifier.weight(1f),
                 )
             }
-            Text(Ui.t("checkup.checked", lang, "n" to r.checked.toString()), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                if (r.checked == 1) Ui.t("checkup.checked_one", lang) else Ui.t("checkup.checked", lang, "n" to r.checked.toString()),
+                style = MaterialTheme.typography.bodyMedium,
+            )
             if (r.outsideStoreOnly > 0) {
                 Text(Ui.t("checkup.outside_only", lang, "n" to r.outsideStoreOnly.toString()), style = MaterialTheme.typography.bodyMedium)
             }
