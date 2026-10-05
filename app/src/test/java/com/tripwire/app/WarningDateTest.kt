@@ -14,8 +14,15 @@ class WarningDateTest {
     @Test
     fun hindiWarningOnAnEnglishPhoneHasHindiMonths() {
         val text = warningDateFormat("hi", Locale.US).format(at)
-        assertEquals("4 अक्तू॰, 7:18 pm", text)
-        assertFalse(text, "Oct" in text)
+        assertEquals("4 अक्तू॰, 7:18 अपराह्न", text)
+        assertFalse(text, Regex("[A-Za-z]").containsMatchIn(text))
+    }
+
+    @Test
+    fun hindiPhoneAlsoGetsHindiMorningAndEvening() {
+        val fmt = warningDateFormat("hi", Locale.forLanguageTag("hi-IN"))
+        assertEquals("4 अक्तू॰, 7:18 अपराह्न", fmt.format(at))
+        assertEquals("4 अक्तू॰, 9:05 पूर्वाह्न", fmt.format(GregorianCalendar(2026, 9, 4, 9, 5).time))
     }
 
     @Test

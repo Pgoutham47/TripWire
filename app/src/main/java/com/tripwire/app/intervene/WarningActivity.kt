@@ -571,11 +571,16 @@ private fun FeedbackScreen(lang: String, onAnswer: (Feedback?) -> Unit) {
 /**
  * Timeline dates in the warning's own language, so a Hindi warning on an English phone has no
  * English month names (PRD 13.4). The phone's own format is kept when its language matches.
+ * Android's Hindi format writes "am"/"pm" in Latin letters, so Hindi gets its own words.
  */
 internal fun warningDateFormat(lang: String, device: Locale = Locale.getDefault()): SimpleDateFormat {
     val base = lang.substringBefore('-')
     val locale = if (device.language == base) device else Locale.forLanguageTag(if ('-' in lang) lang else "$base-IN")
-    return SimpleDateFormat("d MMM, h:mm a", locale)
+    val fmt = SimpleDateFormat("d MMM, h:mm a", locale)
+    if (locale.language == "hi") {
+        fmt.dateFormatSymbols = fmt.dateFormatSymbols.apply { amPmStrings = arrayOf("पूर्वाह्न", "अपराह्न") }
+    }
+    return fmt
 }
 
 private val knownApps = mapOf(
