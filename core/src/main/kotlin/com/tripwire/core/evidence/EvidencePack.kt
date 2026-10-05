@@ -97,6 +97,7 @@ class EvidencePackBuilder(private val pipeline: TripwirePipeline) {
                 EventType.UPI_LINK_OPENED -> explain.string("timeline.payment", lang, mapOf("handle" to (e.upi?.payeeHandle ?: "")))
                 EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> explain.string("timeline.screen_share", lang)
                 EventType.PAYMENT_SMS -> explain.string("timeline.paid", lang)
+                EventType.COLLECT_REQUEST -> explain.string("timeline.collect_request", lang)
                 EventType.USER_REPLY -> e.text?.let { explain.string("pack.user_reply", lang) + ": " + it.take(140) }
             } ?: return@mapNotNull null
             PackTimelineRow(e.timestamp, appLabel(e.app), desc)

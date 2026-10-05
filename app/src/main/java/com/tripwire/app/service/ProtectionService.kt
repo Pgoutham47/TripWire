@@ -9,10 +9,12 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.tripwire.app.collect.AppAccessWatcher
 import com.tripwire.app.collect.InstallWatcher
 import com.tripwire.app.collect.UsageWatcher
 import com.tripwire.app.graph
 import com.tripwire.app.notify.Notifier
+import com.tripwire.app.widget.TripwireWidget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -26,17 +28,20 @@ import kotlinx.coroutines.withContext
 class ProtectionService : LifecycleService() {
     private lateinit var installs: InstallWatcher
     private lateinit var usage: UsageWatcher
+    private lateinit var access: AppAccessWatcher
 
     override fun onCreate() {
         super.onCreate()
         val graph = applicationContext.graph
         installs = InstallWatcher(this, graph).also { it.register() }
         usage = UsageWatcher(this, graph).also { it.start() }
+        access = AppAccessWatcher(this, graph).also { it.register() }
         goForeground(0)
         lifecycleScope.launch {
             while (true) {
                 val active = withContext(Dispatchers.IO) { runCatching { graph.store.allCaseStates().count { it.isOpen } }.getOrDefault(0) }
                 goForeground(active)
+                TripwireWidget.refresh(this@ProtectionService)
                 delay(60_000)
             }
         }
@@ -50,6 +55,7 @@ class ProtectionService : LifecycleService() {
     override fun onDestroy() {
         installs.unregister()
         usage.stop()
+        access.unregister()
         super.onDestroy()
     }
 

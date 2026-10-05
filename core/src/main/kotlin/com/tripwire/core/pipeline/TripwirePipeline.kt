@@ -13,6 +13,10 @@ import com.tripwire.core.engine.ThresholdOffsets
 import com.tripwire.core.entity.EntityExtractor
 import com.tripwire.core.explain.ExplanationBuilder
 import com.tripwire.core.explain.WarningContent
+import com.tripwire.core.guard.FakeCreditDetector
+import com.tripwire.core.guard.GuardAlert
+import com.tripwire.core.guard.RecoveryDetector
+import com.tripwire.core.guard.SmsApps
 import com.tripwire.core.ledger.Feedback
 import com.tripwire.core.ledger.InterventionLevel
 import com.tripwire.core.ledger.InterventionRecord
@@ -66,6 +70,8 @@ data class ProcessResult(
     val tags: List<TacticTag>,
     val notice: QuietNotice?,
     val elapsedMs: Long,
+    /** An instant guard on this message: a fake "credited" SMS or an offer to recover lost money. */
+    val alert: GuardAlert? = null,
 )
 
 /** The broker's verdict at a tripwire moment (PRD 11.2). */
@@ -214,6 +220,10 @@ class TripwirePipeline(
         )
         val hits = Signals.fromEvent(e, tags, ctx).toMutableList()
         if (transactional) hits += SignalHit("ctx:transactional", 1.0)
+        val fakeCredit = e.type == EventType.MESSAGE && e.app in SmsApps.packages && FakeCreditDetector.matches(e.text, e.senderName)
+        val recovery = e.type == EventType.MESSAGE && RecoveryDetector.matches(e.text)
+        if (fakeCredit) hits += SignalHit("check:fake_credit:fail", 1.0)
+        if (recovery) hits += SignalHit("ctx:recovery_offer", 1.0)
 
         val before = store.caseState(caseId) ?: engine.newCase(caseId, e.timestamp)
         val upd = engine.apply(before, hits, e.id, e.timestamp, config().offsets)
@@ -236,8 +246,88 @@ class TripwirePipeline(
             notice = QuietNotice(caseId, iid, title, body, state.stage)
         }
         store.saveCaseState(state)
-        return ProcessResult(caseId, state, tags, notice, (System.nanoTime() - started) / 1_000_000)
+        val alert = when {
+            fakeCredit -> guardOnce(GuardAlert.Kind.FAKE_CREDIT, caseId, e.timestamp)
+            recovery -> guardOnce(GuardAlert.Kind.RECOVERY, caseId, e.timestamp)
+            else -> null
+        }
+        return ProcessResult(caseId, state, tags, notice, (System.nanoTime() - started) / 1_000_000, alert)
     }
+
+    // ---------------------------------------------------------------------------------------
+    // Guards: instant protections beside the engine
+    // ---------------------------------------------------------------------------------------
+
+    /** Builds a guard alert for [caseId] unless this guard already fired for the case. Recorded for the evidence pack. */
+    private fun guardOnce(kind: GuardAlert.Kind, caseId: String, now: Long, params: Map<String, String> = emptyMap(), windowMs: Long? = null): GuardAlert? {
+        val alert = guardAlert(kind, caseId, params)
+        val fired = store.interventions(caseId).any { it.subject == alert.subject && (windowMs == null || now - it.time < windowMs) }
+        if (fired) return null
+        store.saveIntervention(
+            InterventionRecord(caseId = caseId, level = InterventionLevel.QUIET_NOTICE, moment = null, subject = alert.subject, reasons = listOf(alert.body), time = now),
+        )
+        return alert
+    }
+
+    /**
+     * A fake "credited" SMS from a saved contact: their text is never stored (SIG-03), but the
+     * claim is still explained, once per sender per day.
+     */
+    fun fakeCreditFromContact(sender: String, now: Long = clock()): GuardAlert? {
+        if (config().paused) return null
+        synchronized(recentCollects) {
+            val key = "credit|$sender"
+            if (recentCollects[key]?.let { now - it < DAY_MS } == true) return null
+            recentCollects[key] = now
+        }
+        return guardAlert(GuardAlert.Kind.FAKE_CREDIT, null)
+    }
+
+    fun guardAlert(kind: GuardAlert.Kind, caseId: String?, params: Map<String, String> = emptyMap()): GuardAlert {
+        val lang = config().language
+        val key = "guard.${kind.name.lowercase()}"
+        return GuardAlert(kind, caseId, explain.string("$key.title", lang, params), explain.string("$key.body", lang, params))
+    }
+
+    /**
+     * OTP guard: a one-time code arrived while a stranger is on a call, or while a suspicious chat
+     * is active. The code itself is never read or stored; the caller passes only that one arrived.
+     */
+    fun otpArrived(now: Long = clock()): GuardAlert? = synchronized(caseLock) {
+        val cfg = config()
+        if (cfg.paused) return null
+        val window = pack.thresholds.timeLinkMinutes * 60_000L
+        val roots = store.allCounterparties().filter { !it.trusted }.map { rootOf(it.id) }.distinct()
+        val onCall = roots.firstOrNull { callContext(membersOf(it), now).active }
+        val caseId = onCall ?: store.allCaseStates()
+            .filter { it.isOpen && now - it.lastEventAt in 0..window && engine.riskAt(it, now) >= engine.watchThreshold(cfg.offsets) }
+            .maxByOrNull { engine.riskAt(it, now) }?.caseId
+            ?: return null
+        guardOnce(GuardAlert.Kind.OTP, caseId, now, windowMs = OTP_REPEAT_MS)
+    }
+
+    /**
+     * Collect-request guard, for requests that did not reach a full warning: approving any request
+     * sends money, so a request from someone who is not a saved contact gets a plain explanation.
+     */
+    fun collectRequestAlert(obs: Observation): GuardAlert? {
+        if (obs.type != EventType.COLLECT_REQUEST || obs.fromSavedContact || config().paused) return null
+        if (EventType.COLLECT_REQUEST in config().disabledTypes) return null
+        val who = obs.senderName ?: obs.upi?.payeeName ?: obs.upi?.payeeHandle
+        val amount = obs.upi?.amount ?: EntityExtractor.extract(obs.text).amounts.firstOrNull()
+        val now = obs.timestamp
+        val key = "${who.orEmpty()}|${amount?.paise}"
+        synchronized(recentCollects) {
+            recentCollects.entries.removeAll { !it.key.startsWith("credit|") && now - it.value > DEDUPE_MS }
+            if (recentCollects.put(key, now) != null) return null
+        }
+        return guardAlert(
+            GuardAlert.Kind.COLLECT_REQUEST, null,
+            mapOf("who" to (who ?: "Someone"), "amount" to (amount?.let { "₹" + it.format() } ?: "money")),
+        )
+    }
+
+    private val recentCollects = HashMap<String, Long>()
 
     /** Convenience for collectors and the replay harness: ingest, then process or evaluate. */
     fun onObservation(obs: Observation): PipelineOutput {
@@ -696,6 +786,7 @@ class TripwirePipeline(
         const val DEDUPE_MS = 10 * 60 * 1000L
         const val SAME_MESSAGE_MS = 2_000L
         const val INSTALL_DEDUPE_MS = 60 * 1000L
+        const val OTP_REPEAT_MS = 2 * 60 * 1000L
         const val LONG_CALL_MS = 15 * 60 * 1000L
         const val CASE_LIFETIME_MS = 90 * DAY_MS
     }
@@ -734,7 +825,7 @@ fun EventType.isMoment(): Boolean = moment() != null
 
 fun EventType.moment(): TripwireMoment? = when (this) {
     EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED -> TripwireMoment.INSTALL
-    EventType.PAYMENT_APP_OPENED, EventType.UPI_LINK_OPENED -> TripwireMoment.PAYMENT
+    EventType.PAYMENT_APP_OPENED, EventType.UPI_LINK_OPENED, EventType.COLLECT_REQUEST -> TripwireMoment.PAYMENT
     EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> TripwireMoment.SCREEN_SHARE
     else -> null
 }

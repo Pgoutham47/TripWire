@@ -8,8 +8,14 @@ import android.service.notification.StatusBarNotification
 import com.tripwire.app.engine.Guardian
 import com.tripwire.app.graph
 import com.tripwire.core.entity.EntityExtractor
+import com.tripwire.core.guard.CollectRequestDetector
+import com.tripwire.core.guard.FakeCreditDetector
+import com.tripwire.core.guard.OtpDetector
+import com.tripwire.core.guard.SenderIds
+import com.tripwire.core.guard.SmsApps
 import com.tripwire.core.model.EventType
 import com.tripwire.core.model.Observation
+import com.tripwire.core.model.UpiPayment
 import com.tripwire.core.parse.NotificationParser
 import com.tripwire.core.parse.PaymentSmsParser
 
@@ -42,6 +48,10 @@ class NotificationCollector : NotificationListenerService() {
             onCall(sbn, n)
             return
         }
+        if (pack.apps.payment.any { it.packageName == pkg }) {
+            onPaymentApp(pkg, n)
+            return
+        }
         if (pack.apps.messaging.none { it.packageName == pkg }) return
         // "Missed voice call" is not a message; the ringing call was already recorded above (SIG-12).
         if (n.category == CATEGORY_MISSED_CALL) return
@@ -65,6 +75,14 @@ class NotificationCollector : NotificationListenerService() {
             listOf(raw(pkg, extras, extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(), null, false) to postedAt)
         }
         for ((raw, sentAt) in raws) {
+            // OTP guard: a code in an SMS is never stored. Android 15+ hides codes from listeners,
+            // so a hidden SMS is treated as a code: Tripwire only needs to know one arrived.
+            if (isSmsApp(pkg) && (isRedacted(raw.text) || OtpDetector.looksLikeOtp(raw.text))) {
+                if (isRedacted(raw.text)) redactedCount++
+                Guardian.debug { "one-time code arrived by SMS (hidden by the system=${isRedacted(raw.text)})" }
+                graph.guardian.otpArrived()
+                continue
+            }
             val parsed = NotificationParser.parse(raw)
             // Android 15+ redacts notifications it classes as sensitive for untrusted listeners
             // (PRD 15.3). The placeholder carries no sender or text, so it is dropped, not stored.
@@ -84,14 +102,21 @@ class NotificationCollector : NotificationListenerService() {
             }
 
             val now = sentAt.coerceAtMost(System.currentTimeMillis())
-            // Payment confirmations from bank short codes feed the evidence pack (SIG-14).
-            if (isSmsApp(pkg) && PaymentSmsParser.parse(parsed.text, now) != null) {
+            // Payment confirmations from bank sender IDs feed the evidence pack (SIG-14). An SMS from
+            // a person is never a bank alert, whatever it says.
+            val businessSender = SenderIds.isBusiness(parsed.senderName)
+            if (isSmsApp(pkg) && businessSender && PaymentSmsParser.parse(parsed.text, now) != null) {
                 graph.guardian.submit(
                     Observation(EventType.PAYMENT_SMS, pkg, now, "notification", text = parsed.text, senderName = parsed.senderName),
                 )
                 continue
             }
             val contact = Contacts.isSavedContact(this, parsed.senderName, parsed.senderPhone)
+            // A fake "credited" SMS from a saved contact: explained, but the text is not kept (SIG-03).
+            if (contact && isSmsApp(pkg) && !businessSender && FakeCreditDetector.isCreditClaim(parsed.text)) {
+                graph.guardian.fakeCreditFromContact(parsed.senderName)
+                continue
+            }
             graph.guardian.submit(
                 Observation(
                     type = if (parsed.isGroupAdd) EventType.GROUP_ADDED else EventType.MESSAGE,
@@ -107,6 +132,31 @@ class NotificationCollector : NotificationListenerService() {
                 ),
             )
         }
+    }
+
+    /** UPI apps: a request to approve a payment (collect request) is a payment moment. */
+    private fun onPaymentApp(pkg: String, n: Notification) {
+        if (n.flags and (Notification.FLAG_GROUP_SUMMARY or Notification.FLAG_ONGOING_EVENT or Notification.FLAG_FOREGROUND_SERVICE) != 0) return
+        val extras = n.extras ?: return
+        val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
+        val text = (extras.getCharSequence(Notification.EXTRA_BIG_TEXT) ?: extras.getCharSequence(Notification.EXTRA_TEXT))?.toString()
+        val req = CollectRequestDetector.parse(title, text) ?: return
+        val key = "$pkg|${req.requester}|${req.amount?.paise}"
+        if (seen.put(key, Unit) != null) return
+        Guardian.debug { "collect request in $pkg, requester found=${req.requester != null}, amount found=${req.amount != null}" }
+        val contact = req.requester?.let { Contacts.isSavedContact(this, it, null) } ?: false
+        applicationContext.graph.guardian.submit(
+            Observation(
+                type = EventType.COLLECT_REQUEST,
+                app = pkg,
+                timestamp = System.currentTimeMillis(),
+                source = "notification",
+                text = listOfNotNull(title, text).joinToString(" · "),
+                senderName = req.requester,
+                fromSavedContact = contact,
+                upi = req.handle?.let { UpiPayment(payeeHandle = it, payeeName = req.requester, amount = req.amount) },
+            ),
+        )
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
@@ -142,7 +192,7 @@ class NotificationCollector : NotificationListenerService() {
         return CALL_TEXT.containsMatchIn(text) && n.flags and Notification.FLAG_ONGOING_EVENT != 0
     }
 
-    private fun isSmsApp(pkg: String) = pkg in SMS_APPS
+    private fun isSmsApp(pkg: String) = pkg in SmsApps.packages
 
     private fun isRedacted(text: String?): Boolean {
         if (text == null) return false
@@ -201,6 +251,5 @@ class NotificationCollector : NotificationListenerService() {
         private const val FRESH_MS = 5 * 60_000L
         private val CALL_TEXT = Regex("(?i)(ongoing|incoming|calling|voice call|video call|कॉल)")
         private val VIDEO = Regex("(?i)(video|वीडियो)")
-        private val SMS_APPS = setOf("com.google.android.apps.messaging", "com.samsung.android.messaging", "com.android.mms", "com.truecaller")
     }
 }

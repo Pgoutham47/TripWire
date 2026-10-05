@@ -47,6 +47,7 @@
     "event:app_installed": 0.3,
     "event:install_screen_opened": 0.3,
     "event:upi_link_opened": 0.4,
+    "event:collect_request": 0.4,
     "event:payment_app_opened": 0.2,
     "event:payment_sms": 0.2,
     "check:install_source:fail": 1.0,
@@ -100,6 +101,7 @@
       "tag:payment_request",
       "check:valid_handle:fail",
       "event:upi_link_opened",
+      "event:collect_request",
       "entity:upi_handle",
       "event:payment_app_opened"
      ],
@@ -207,6 +209,7 @@
     "entity:upi_handle": 0.3,
     "event:payment_app_opened": 0.2,
     "event:upi_link_opened": 0.3,
+    "event:collect_request": 0.3,
     "check:valid_handle:pass": -1.0,
     "check:known_bad:fail": 3.0,
     "ctx:transactional": -2.0,
@@ -249,6 +252,7 @@
       "tag:payment_request",
       "event:payment_app_opened",
       "event:upi_link_opened",
+      "event:collect_request",
       "ctx:during_call",
       "entity:upi_handle"
      ],
@@ -467,6 +471,7 @@
     "entity:telegram": 0.5,
     "entity:upi_handle": 0.4,
     "event:upi_link_opened": 0.4,
+    "event:collect_request": 0.4,
     "event:payment_app_opened": 0.2,
     "ctx:repeat_payment": 1.2,
     "check:known_bad:fail": 3.0,
@@ -1148,6 +1153,173 @@
    ]
   }
  ],
+ "banks": [
+  {
+   "id": "sbi",
+   "name": "SBI",
+   "aliases": [
+    "State Bank of India",
+    "SBI"
+   ],
+   "smsHeaders": [
+    "SBIINB",
+    "SBIUPI",
+    "ATMSBI",
+    "CBSSBI",
+    "SBIPSG",
+    "SBYONO"
+   ],
+   "fraudLine": "1800 1111 09",
+   "source": "https://sbi.bank.in/web/customer-care/contact-centre"
+  },
+  {
+   "id": "hdfc",
+   "name": "HDFC Bank",
+   "aliases": [
+    "HDFC Bank",
+    "HDFC"
+   ],
+   "smsHeaders": [
+    "HDFCBK",
+    "HDFCBN"
+   ],
+   "fraudLine": "1800 258 6161",
+   "source": "https://www.hdfc.bank.in/need-help/report-unauthorized-transactions"
+  },
+  {
+   "id": "icici",
+   "name": "ICICI Bank",
+   "aliases": [
+    "ICICI Bank",
+    "ICICI"
+   ],
+   "smsHeaders": [
+    "ICICIB",
+    "ICICIT"
+   ],
+   "fraudLine": "1800 2662",
+   "source": "https://www.icici.bank.in/personal-banking/help/online-safe-banking/report-unauthorized-transaction"
+  },
+  {
+   "id": "axis",
+   "name": "Axis Bank",
+   "aliases": [
+    "Axis Bank"
+   ],
+   "smsHeaders": [
+    "AXISBK",
+    "AXISMR",
+    "AXSBK"
+   ],
+   "fraudLine": "1800 103 5577",
+   "source": "https://application.axis.bank.in/webforms/axis-support/sub-issues/FND-Fraud-ccdcsa-4.aspx"
+  },
+  {
+   "id": "kotak",
+   "name": "Kotak Mahindra Bank",
+   "aliases": [
+    "Kotak Mahindra",
+    "Kotak"
+   ],
+   "smsHeaders": [
+    "KOTAKB"
+   ],
+   "fraudLine": "1800 209 0000",
+   "source": "https://www.kotak.bank.in/en/customer-service/contact-us.html"
+  },
+  {
+   "id": "pnb",
+   "name": "Punjab National Bank",
+   "aliases": [
+    "Punjab National Bank",
+    "PNB"
+   ],
+   "smsHeaders": [
+    "PNBSMS"
+   ],
+   "fraudLine": "1800 1800",
+   "source": "https://pnb.bank.in/hotlist-debit-card.html"
+  },
+  {
+   "id": "bob",
+   "name": "Bank of Baroda",
+   "aliases": [
+    "Bank of Baroda",
+    "BoB"
+   ],
+   "smsHeaders": [
+    "BOBTXN",
+    "BOBSMS"
+   ],
+   "fraudLine": "1800 5700",
+   "source": "https://bankofbaroda.bank.in/contact-us"
+  },
+  {
+   "id": "canara",
+   "name": "Canara Bank",
+   "aliases": [
+    "Canara Bank",
+    "Canara"
+   ],
+   "smsHeaders": [
+    "CANBNK"
+   ],
+   "fraudLine": "1800 1030",
+   "source": "https://www.canarabank.bank.in/hotlisting-debit-and-credit-cards"
+  },
+  {
+   "id": "union",
+   "name": "Union Bank of India",
+   "aliases": [
+    "Union Bank of India",
+    "Union Bank"
+   ],
+   "smsHeaders": [
+    "UNIONB"
+   ],
+   "fraudLine": "1800 8332",
+   "source": "https://www.unionbankofindia.bank.in/en/common/customer-care"
+  },
+  {
+   "id": "idfc",
+   "name": "IDFC FIRST Bank",
+   "aliases": [
+    "IDFC FIRST",
+    "IDFC"
+   ],
+   "smsHeaders": [
+    "IDFCFB",
+    "IDFCBK"
+   ],
+   "fraudLine": "1800 10 888",
+   "source": "https://www.idfcfirst.bank.in/safe-banking"
+  },
+  {
+   "id": "yes",
+   "name": "Yes Bank",
+   "aliases": [
+    "Yes Bank"
+   ],
+   "smsHeaders": [
+    "YESBNK",
+    "YESBCC"
+   ],
+   "fraudLine": "1800 1200",
+   "source": "https://www.yes.bank.in/"
+  },
+  {
+   "id": "indusind",
+   "name": "IndusInd Bank",
+   "aliases": [
+    "IndusInd"
+   ],
+   "smsHeaders": [
+    "INDUSB"
+   ],
+   "fraudLine": "1860 267 7777",
+   "source": "https://www.indusind.bank.in/in/en/personal/customer-limited-liability.html"
+  }
+ ],
  "validHandlePattern": "^[a-z0-9][a-z0-9._-]*\\.(brk|mf)@valid[a-z]+$",
  "sebiCheckUrl": "https://www.sebi.gov.in/",
  "reasons": {
@@ -1428,6 +1600,58 @@
   "timeline.payment": {
    "en": "Payment to {handle}",
    "hi": "{handle} को भुगतान"
+  },
+  "timeline.collect_request": {
+   "en": "Asked you to approve a payment request",
+   "hi": "भुगतान का अनुरोध मंज़ूर करने को कहा"
+  },
+  "guard.otp.title": {
+   "en": "Don't share this code",
+   "hi": "यह कोड किसी को न बताएँ"
+  },
+  "guard.otp.body": {
+   "en": "A one-time code just arrived while a stranger is in touch with you. Banks, police and companies never ask for it. Anyone who asks is a scammer.",
+   "hi": "किसी अनजान व्यक्ति से बात के दौरान अभी एक कोड आया है। बैंक, पुलिस या कंपनियाँ यह कोड कभी नहीं माँगतीं। जो माँगे, वह धोखेबाज़ है।"
+  },
+  "guard.fake_credit.title": {
+   "en": "This \"money credited\" SMS is fake",
+   "hi": "यह \"पैसा जमा\" वाला SMS नकली है"
+  },
+  "guard.fake_credit.body": {
+   "en": "It came from a mobile number. Banks send alerts from names like VM-SBIINB, never from a phone number. Check your bank app before you send anything back.",
+   "hi": "यह एक मोबाइल नंबर से आया है। बैंक VM-SBIINB जैसे नाम से मैसेज भेजते हैं, फ़ोन नंबर से कभी नहीं। कुछ भी लौटाने से पहले अपना बैंक ऐप देखें।"
+  },
+  "guard.collect_request.title": {
+   "en": "Approving this sends money",
+   "hi": "मंज़ूर करने से पैसा चला जाएगा"
+  },
+  "guard.collect_request.body": {
+   "en": "{who} is asking you to approve {amount}. Approving a request takes money from your account. You never need to approve anything to receive money.",
+   "hi": "{who} आपसे {amount} मंज़ूर करने को कह रहे हैं। अनुरोध मंज़ूर करने से आपके खाते से पैसा जाता है। पैसा पाने के लिए कुछ भी मंज़ूर नहीं करना पड़ता।"
+  },
+  "guard.recovery.title": {
+   "en": "Offers to recover lost money are a scam",
+   "hi": "खोया पैसा वापस दिलाने का वादा धोखा है"
+  },
+  "guard.recovery.body": {
+   "en": "Police and banks never charge a fee to get your money back. Report only at 1930 or cybercrime.gov.in.",
+   "hi": "पुलिस और बैंक पैसा वापस दिलाने के लिए कभी फ़ीस नहीं लेते। शिकायत सिर्फ़ 1930 या cybercrime.gov.in पर करें।"
+  },
+  "guard.app_access.title": {
+   "en": "{app} can now control your phone",
+   "hi": "{app} अब आपका फ़ोन चला सकता है"
+  },
+  "guard.app_access.body": {
+   "en": "{app} was installed from outside an app store and was just given {access}. Banking malware does this to steal codes and money. If you did not mean to, turn it off now.",
+   "hi": "{app} ऐप स्टोर के बाहर से इंस्टॉल हुआ है और इसे अभी {access} मिली है। बैंकिंग मैलवेयर कोड और पैसे चुराने के लिए यही करता है। अगर आपने जान-बूझकर नहीं किया, तो अभी बंद करें।"
+  },
+  "guard.access.screen": {
+   "en": "control of your screen",
+   "hi": "आपकी स्क्रीन चलाने की अनुमति"
+  },
+  "guard.access.notifications": {
+   "en": "access to your notifications and codes",
+   "hi": "आपके नोटिफ़िकेशन और कोड पढ़ने की अनुमति"
   },
   "timeline.install_screen": {
    "en": "Started installing {app} from a link",

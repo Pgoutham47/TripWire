@@ -67,6 +67,7 @@ fake_investment = {
         "event:app_installed": 0.3,
         "event:install_screen_opened": 0.3,
         "event:upi_link_opened": 0.4,
+        "event:collect_request": 0.4,
         "event:payment_app_opened": 0.2,
         "event:payment_sms": 0.2,
         "check:install_source:fail": 1.0,
@@ -83,7 +84,7 @@ fake_investment = {
         {"stage": "HOOK", "evidence": ["tag:guaranteed_returns", "tag:fake_social_proof", "tag:small_win_bait", "tag:exclusivity"], "minEvidence": 1.0},
         {"stage": "GROOMING", "evidence": ["tag:channel_move", "ctx:private_after_group", "ctx:cross_app", "tag:exclusivity", "tag:secrecy", "tag:urgency", "entity:telegram"], "minEvidence": 1.2},
         {"stage": "COMMITMENT", "evidence": ["tag:install_request", "entity:apk_link", "check:install_source:fail", "event:app_installed", "event:install_screen_opened"], "minEvidence": 1.2},
-        {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "check:valid_handle:fail", "event:upi_link_opened", "entity:upi_handle", "event:payment_app_opened"], "minEvidence": 1.0},
+        {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "check:valid_handle:fail", "event:upi_link_opened", "event:collect_request", "entity:upi_handle", "event:payment_app_opened"], "minEvidence": 1.0},
         {"stage": "LOCK_IN", "evidence": ["tag:fee_to_withdraw", "ctx:repeat_payment"], "minEvidence": 1.5},
     ],
     "hardRules": [
@@ -138,6 +139,7 @@ digital_arrest = {
         "entity:upi_handle": 0.3,
         "event:payment_app_opened": 0.2,
         "event:upi_link_opened": 0.3,
+        "event:collect_request": 0.3,
         "check:valid_handle:pass": -1.0,
         "check:known_bad:fail": 3.0,
         "ctx:transactional": -2.0,
@@ -148,7 +150,7 @@ digital_arrest = {
         {"stage": "HOOK", "evidence": ["tag:authority_claim", "tag:legal_threat"], "minEvidence": 1.5},
         {"stage": "GROOMING", "evidence": ["tag:secrecy", "ctx:video_call", "ctx:long_call", "tag:urgency", "tag:channel_move"], "minEvidence": 1.0},
         {"stage": "COMMITMENT", "evidence": ["tag:remote_access_request", "event:screen_share_started", "event:remote_app_opened", "tag:credential_request"], "minEvidence": 1.0},
-        {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "event:payment_app_opened", "event:upi_link_opened", "ctx:during_call", "entity:upi_handle"], "minEvidence": 1.0},
+        {"stage": "EXTRACTION", "evidence": ["tag:payment_request", "event:payment_app_opened", "event:upi_link_opened", "event:collect_request", "ctx:during_call", "entity:upi_handle"], "minEvidence": 1.0},
         {"stage": "LOCK_IN", "evidence": ["ctx:repeat_payment"], "minEvidence": 1.0},
     ],
     "hardRules": [
@@ -249,6 +251,7 @@ task_scam = {
         "entity:telegram": 0.5,
         "entity:upi_handle": 0.4,
         "event:upi_link_opened": 0.4,
+        "event:collect_request": 0.4,
         "event:payment_app_opened": 0.2,
         "ctx:repeat_payment": 1.2,
         "check:known_bad:fail": 3.0,
@@ -584,6 +587,26 @@ strings = {
     "timeline.group_added": L("Added to {group}", "{group} में जोड़ा गया"),
     "timeline.app_installed": L("Installed {app} from a link", "लिंक से {app} इंस्टॉल किया"),
     "timeline.payment": L("Payment to {handle}", "{handle} को भुगतान"),
+    "timeline.collect_request": L("Asked you to approve a payment request", "भुगतान का अनुरोध मंज़ूर करने को कहा"),
+
+    "guard.otp.title": L("Don't share this code", "यह कोड किसी को न बताएँ"),
+    "guard.otp.body": L("A one-time code just arrived while a stranger is in touch with you. Banks, police and companies never ask for it. Anyone who asks is a scammer.",
+                        "किसी अनजान व्यक्ति से बात के दौरान अभी एक कोड आया है। बैंक, पुलिस या कंपनियाँ यह कोड कभी नहीं माँगतीं। जो माँगे, वह धोखेबाज़ है।"),
+    "guard.fake_credit.title": L("This \"money credited\" SMS is fake", "यह \"पैसा जमा\" वाला SMS नकली है"),
+    "guard.fake_credit.body": L("It came from a mobile number. Banks send alerts from names like VM-SBIINB, never from a phone number. Check your bank app before you send anything back.",
+                                "यह एक मोबाइल नंबर से आया है। बैंक VM-SBIINB जैसे नाम से मैसेज भेजते हैं, फ़ोन नंबर से कभी नहीं। कुछ भी लौटाने से पहले अपना बैंक ऐप देखें।"),
+    "guard.collect_request.title": L("Approving this sends money", "मंज़ूर करने से पैसा चला जाएगा"),
+    "guard.collect_request.body": L("{who} is asking you to approve {amount}. Approving a request takes money from your account. You never need to approve anything to receive money.",
+                                    "{who} आपसे {amount} मंज़ूर करने को कह रहे हैं। अनुरोध मंज़ूर करने से आपके खाते से पैसा जाता है। पैसा पाने के लिए कुछ भी मंज़ूर नहीं करना पड़ता।"),
+    "guard.recovery.title": L("Offers to recover lost money are a scam", "खोया पैसा वापस दिलाने का वादा धोखा है"),
+    "guard.recovery.body": L("Police and banks never charge a fee to get your money back. Report only at 1930 or cybercrime.gov.in.",
+                             "पुलिस और बैंक पैसा वापस दिलाने के लिए कभी फ़ीस नहीं लेते। शिकायत सिर्फ़ 1930 या cybercrime.gov.in पर करें।"),
+    "guard.app_access.title": L("{app} can now control your phone", "{app} अब आपका फ़ोन चला सकता है"),
+    "guard.app_access.body": L("{app} was installed from outside an app store and was just given {access}. Banking malware does this to steal codes and money. If you did not mean to, turn it off now.",
+                               "{app} ऐप स्टोर के बाहर से इंस्टॉल हुआ है और इसे अभी {access} मिली है। बैंकिंग मैलवेयर कोड और पैसे चुराने के लिए यही करता है। अगर आपने जान-बूझकर नहीं किया, तो अभी बंद करें।"),
+    "guard.access.screen": L("control of your screen", "आपकी स्क्रीन चलाने की अनुमति"),
+    "guard.access.notifications": L("access to your notifications and codes", "आपके नोटिफ़िकेशन और कोड पढ़ने की अनुमति"),
+
     "timeline.install_screen": L("Started installing {app} from a link", "लिंक से {app} इंस्टॉल करना शुरू किया"),
     "timeline.call": L("Call from a stranger", "अनजान नंबर से कॉल"),
     "timeline.video_call": L("Video call from a stranger", "अनजान नंबर से वीडियो कॉल"),
@@ -633,6 +656,36 @@ strings = {
                              "Tripwire: {name} के फ़ोन पर चल रहे {family} मामले के दौरान सुरक्षा बंद कर दी गई। कृपया उन्हें कॉल करें।"),
 }
 
+# Fraud lines read on each bank's own website (*.bank.in) on 2026-10-05. Never add a number from a
+# blog or search snippet: a wrong number can route a victim to a scammer. SMS headers for HDFC and
+# Axis are published by the banks; the rest come from public header lists and may change.
+banks = [
+    {"id": "sbi", "name": "SBI", "aliases": ["State Bank of India", "SBI"], "smsHeaders": ["SBIINB", "SBIUPI", "ATMSBI", "CBSSBI", "SBIPSG", "SBYONO"],
+     "fraudLine": "1800 1111 09", "source": "https://sbi.bank.in/web/customer-care/contact-centre"},
+    {"id": "hdfc", "name": "HDFC Bank", "aliases": ["HDFC Bank", "HDFC"], "smsHeaders": ["HDFCBK", "HDFCBN"],
+     "fraudLine": "1800 258 6161", "source": "https://www.hdfc.bank.in/need-help/report-unauthorized-transactions"},
+    {"id": "icici", "name": "ICICI Bank", "aliases": ["ICICI Bank", "ICICI"], "smsHeaders": ["ICICIB", "ICICIT"],
+     "fraudLine": "1800 2662", "source": "https://www.icici.bank.in/personal-banking/help/online-safe-banking/report-unauthorized-transaction"},
+    {"id": "axis", "name": "Axis Bank", "aliases": ["Axis Bank"], "smsHeaders": ["AXISBK", "AXISMR", "AXSBK"],
+     "fraudLine": "1800 103 5577", "source": "https://application.axis.bank.in/webforms/axis-support/sub-issues/FND-Fraud-ccdcsa-4.aspx"},
+    {"id": "kotak", "name": "Kotak Mahindra Bank", "aliases": ["Kotak Mahindra", "Kotak"], "smsHeaders": ["KOTAKB"],
+     "fraudLine": "1800 209 0000", "source": "https://www.kotak.bank.in/en/customer-service/contact-us.html"},
+    {"id": "pnb", "name": "Punjab National Bank", "aliases": ["Punjab National Bank", "PNB"], "smsHeaders": ["PNBSMS"],
+     "fraudLine": "1800 1800", "source": "https://pnb.bank.in/hotlist-debit-card.html"},
+    {"id": "bob", "name": "Bank of Baroda", "aliases": ["Bank of Baroda", "BoB"], "smsHeaders": ["BOBTXN", "BOBSMS"],
+     "fraudLine": "1800 5700", "source": "https://bankofbaroda.bank.in/contact-us"},
+    {"id": "canara", "name": "Canara Bank", "aliases": ["Canara Bank", "Canara"], "smsHeaders": ["CANBNK"],
+     "fraudLine": "1800 1030", "source": "https://www.canarabank.bank.in/hotlisting-debit-and-credit-cards"},
+    {"id": "union", "name": "Union Bank of India", "aliases": ["Union Bank of India", "Union Bank"], "smsHeaders": ["UNIONB"],
+     "fraudLine": "1800 8332", "source": "https://www.unionbankofindia.bank.in/en/common/customer-care"},
+    {"id": "idfc", "name": "IDFC FIRST Bank", "aliases": ["IDFC FIRST", "IDFC"], "smsHeaders": ["IDFCFB", "IDFCBK"],
+     "fraudLine": "1800 10 888", "source": "https://www.idfcfirst.bank.in/safe-banking"},
+    {"id": "yes", "name": "Yes Bank", "aliases": ["Yes Bank"], "smsHeaders": ["YESBNK", "YESBCC"],
+     "fraudLine": "1800 1200", "source": "https://www.yes.bank.in/"},
+    {"id": "indusind", "name": "IndusInd Bank", "aliases": ["IndusInd"], "smsHeaders": ["INDUSB"],
+     "fraudLine": "1860 267 7777", "source": "https://www.indusind.bank.in/in/en/personal/customer-limited-liability.html"},
+]
+
 pack = {
     "version": VERSION,
     "createdAt": "2026-10-05",
@@ -647,6 +700,7 @@ pack = {
         "domains": ["reported-scam.example"],
     },
     "brands": brands,
+    "banks": banks,
     # SEBI format: <name>.<category>@valid<bank>, e.g. abc.brk@validhdfc. Open question 23.2: confirm the exact rule.
     "validHandlePattern": r"^[a-z0-9][a-z0-9._-]*\.(brk|mf)@valid[a-z]+$",
     # Open question 23.2: whether SEBI Check offers a deep link with the handle filled in.

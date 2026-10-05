@@ -14,6 +14,7 @@ import com.tripwire.app.R
 import com.tripwire.app.intervene.WarningActivity
 import com.tripwire.app.intervene.WarningRequest
 import com.tripwire.app.ui.Ui
+import com.tripwire.core.guard.GuardAlert
 import com.tripwire.core.pipeline.QuietNotice
 
 /** Notification channels and every notification Tripwire posts (INT-01, UI-04). */
@@ -33,6 +34,10 @@ class Notifier(private val context: Context) {
                 NotificationChannel(CH_WARNINGS, "Scam warnings", NotificationManager.IMPORTANCE_HIGH).apply {
                     description = "Full-screen warnings before an install, a payment or screen sharing."
                     lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                },
+                NotificationChannel(CH_ALERTS, "Instant alerts", NotificationManager.IMPORTANCE_HIGH).apply {
+                    description = "A code arriving during a stranger's call, fake \"credited\" SMS, payment requests, recovery offers and risky app access."
+                    lockscreenVisibility = Notification.VISIBILITY_PRIVATE
                 },
                 NotificationChannel(CH_FOLLOWUP, "Follow-ups", NotificationManager.IMPORTANCE_DEFAULT).apply {
                     description = "Check-ins after you went ahead, and ally alert status."
@@ -57,6 +62,8 @@ class Notifier(private val context: Context) {
             .setContentTitle(Ui.t("app.name", lang))
             .setContentText(text)
             .setOngoing(true)
+            // Its own group, so Android never bundles a warning underneath the status line.
+            .setGroup(GROUP_STATUS)
             .setContentIntent(open)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .build()
@@ -110,6 +117,34 @@ class Notifier(private val context: Context) {
 
     fun cancelWarning() = nm.cancel(WARNING_ID)
 
+    /**
+     * A guard alert pops up at once (heads-up). Tapping it opens the case, or [tap] when given
+     * (for app access, the settings page where it can be turned off).
+     */
+    fun guardAlert(alert: GuardAlert, tap: Intent? = null) {
+        val intent = tap ?: Intent(context, MainActivity::class.java).apply {
+            alert.caseId?.let { putExtra(MainActivity.EXTRA_CASE_ID, it) }
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        }
+        val id = ALERT_ID_BASE + alert.kind.ordinal
+        val pi = PendingIntent.getActivity(context, id, intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        post(
+            id,
+            NotificationCompat.Builder(context, CH_ALERTS)
+                .setSmallIcon(R.drawable.ic_shield)
+                .setContentTitle(alert.title)
+                .setContentText(alert.body)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(alert.body))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setColor(0xFFB3261E.toInt())
+                .setGroup(GROUP_ALERTS)
+                .setContentIntent(pi)
+                .setAutoCancel(true)
+                .build(),
+        )
+    }
+
     fun followUp(id: Int, title: String, text: String, intent: Intent) {
         val pi = PendingIntent.getActivity(context, id, intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         post(
@@ -140,6 +175,10 @@ class Notifier(private val context: Context) {
         const val CH_NOTICES = "notices"
         const val CH_WARNINGS = "warnings"
         const val CH_FOLLOWUP = "followup"
+        const val CH_ALERTS = "alerts"
+        private const val ALERT_ID_BASE = 40
+        private const val GROUP_STATUS = "tripwire.status"
+        private const val GROUP_ALERTS = "tripwire.alerts"
         const val PROTECTION_ID = 1
         const val WARNING_ID = 2
     }

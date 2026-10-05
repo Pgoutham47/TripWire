@@ -2,4 +2,6 @@
 <resources>
     <string name="install_screen_label">Tripwire: इंस्टॉल से पहले चेतावनी</string>
     <string name="install_screen_description">Tripwire इसका इस्तेमाल सिर्फ़ Android की ऐप इंस्टॉल स्क्रीन देखने के लिए करता है, ताकि धोखेबाज़ का भेजा ऐप इंस्टॉल होने से पहले आपको चेतावनी दे सके। यह आपके मैसेज, पासवर्ड या कोई दूसरा ऐप नहीं पढ़ता।</string>
+    <string name="widget_label">Tripwire स्थिति</string>
+    <string name="widget_description">सुरक्षा की स्थिति, संदिग्ध चैट और \"मैंने भुगतान कर दिया\"।</string>
 </resources>

@@ -27,6 +27,8 @@ data class ScriptPack(
     val keywordRules: List<KeywordRule>,
     val knownBad: KnownBad = KnownBad(),
     val brands: List<BrandDef> = emptyList(),
+    /** Banks and their official fraud lines, for "I already paid" (EVD-03). */
+    val banks: List<BankDef> = emptyList(),
     val validHandlePattern: String,
     val sebiCheckUrl: String,
     /** Reason sentences keyed by signal, per language. Placeholders in braces, see [com.tripwire.core.explain.ExplanationBuilder]. */
@@ -156,6 +158,19 @@ data class KnownBad(
     val handles: List<String> = emptyList(),
     val numbers: List<String> = emptyList(),
     val domains: List<String> = emptyList(),
+)
+
+/** A bank: how its SMS alerts are signed, and the fraud line on its own website. */
+@Serializable
+data class BankDef(
+    val id: String,
+    val name: String,
+    val aliases: List<String> = emptyList(),
+    /** The six characters of an SMS sender ID, e.g. SBIINB in VM-SBIINB-S. */
+    val smsHeaders: List<String> = emptyList(),
+    val fraudLine: String,
+    /** The official page the number was read from. */
+    val source: String,
 )
 
 /** A real broker or bank that scammers imitate (CHK-07). */

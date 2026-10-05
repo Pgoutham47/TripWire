@@ -3,18 +3,23 @@ package com.tripwire.app.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.tripwire.app.collect.InstalledApps
 import com.tripwire.app.data.AllyRow
 import com.tripwire.app.data.TripwireSettings
 import com.tripwire.app.evidence.PackPdf
 import com.tripwire.app.graph
 import com.tripwire.app.intervene.WarningRequest
 import com.tripwire.app.intervene.appLabel
+import com.tripwire.app.widget.TripwireWidget
 import com.tripwire.core.engine.CaseState
 import com.tripwire.core.evidence.AllyAlert
 import com.tripwire.core.evidence.Complainant
 import com.tripwire.core.evidence.EvidencePack
 import com.tripwire.core.evidence.EvidencePackBuilder
 import com.tripwire.core.evidence.TransactionDetails
+import com.tripwire.core.guard.CheckupResult
+import com.tripwire.core.guard.BankDirectory
+import com.tripwire.core.guard.PhoneCheckup
 import com.tripwire.core.ledger.InMemoryLedgerStore
 import com.tripwire.core.model.EventType
 import com.tripwire.core.model.Stage
@@ -22,6 +27,8 @@ import com.tripwire.core.pipeline.PipelineConfig
 import com.tripwire.core.pipeline.TripwirePipeline
 import com.tripwire.core.replay.ReplayHarness
 import com.tripwire.core.replay.Scenario
+import com.tripwire.core.script.BankDef
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +43,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 data class CaseItem(
     val caseId: String,
@@ -101,6 +107,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         EventType.CALL_STARTED -> explain.string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang)
                         EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> explain.string("timeline.screen_share", lang)
                         EventType.PAYMENT_SMS -> explain.string("timeline.paid", lang)
+                        EventType.COLLECT_REQUEST -> explain.string("timeline.collect_request", lang)
                         else -> type.wire
                     }
                     TimelineRow(type, e.timestamp, e.app, title, if (e.textDeleted) Ui.t("timeline.deleted", lang) else e.text, tactics)
@@ -141,10 +148,32 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val turnedOff = (!before.isPaused(System.currentTimeMillis()) && after.isPaused(System.currentTimeMillis())) ||
             after.disabledCollectors.size > before.disabledCollectors.size
         if (turnedOff && cases.value.isNotEmpty()) graph.guardian.alertAlly(cases.value.first().caseId, AllyAlert.Kind.PROTECTION_OFF)
+        TripwireWidget.refresh(getApplication())
     }
 
-    fun markTrusted(caseId: String) = io { graph.pipeline.markTrusted(caseId) }
-    fun deleteCase(caseId: String) = io { graph.pipeline.deleteCase(caseId) }
+    fun markTrusted(caseId: String) = io {
+        graph.pipeline.markTrusted(caseId)
+        TripwireWidget.refresh(getApplication())
+    }
+
+    fun deleteCase(caseId: String) = io {
+        graph.pipeline.deleteCase(caseId)
+        TripwireWidget.refresh(getApplication())
+    }
+
+    val banks get() = graph.pack.banks
+
+    /** The bank behind the case's latest payment SMS, for its fraud line (EVD-03). */
+    suspend fun bankFor(caseId: String): BankDef? = withContext(Dispatchers.IO) {
+        val members = graph.pipeline.membersOf(caseId)
+        val sms = graph.store.eventsFor(members).lastOrNull { it.type == EventType.PAYMENT_SMS } ?: return@withContext null
+        BankDirectory(graph.pack).identify(sms.senderName, sms.text)
+    }
+
+    /** The phone checkup: installed apps that deserve a look, worst first. */
+    suspend fun runCheckup(): CheckupResult = withContext(Dispatchers.IO) {
+        PhoneCheckup(graph.pack).assess(InstalledApps.installedByUser(getApplication()), getApplication<Application>().packageName)
+    }
 
     fun deleteAll(onDone: () -> Unit) = viewModelScope.launch {
         withContext(Dispatchers.IO) {
@@ -153,6 +182,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
         // Derived from the deleted records, so they go too; language and permissions stay.
         graph.settings.update { it.copy(paidShortcutUntil = 0, watchOffset = 0, warnOffset = 0) }
+        TripwireWidget.refresh(getApplication())
         onDone()
     }
 

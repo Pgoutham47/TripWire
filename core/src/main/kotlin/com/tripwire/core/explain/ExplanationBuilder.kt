@@ -193,6 +193,7 @@ class ExplanationBuilder(private val pack: ScriptPack) {
                 EventType.CALL_STARTED -> string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang) to true
                 EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> string("timeline.screen_share", lang) to true
                 EventType.PAYMENT_SMS -> string("timeline.paid", lang) to true
+                EventType.COLLECT_REQUEST -> string("timeline.collect_request", lang) to true
                 EventType.CALL_ENDED -> null to true
             }
             if (label != null && seen.add(label)) items += Item(TimelineItem(e.timestamp, e.app, label), system)

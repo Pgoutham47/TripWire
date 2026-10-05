@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.tripwire.app.service.ProtectionService
 import com.tripwire.app.ui.AppViewModel
 import com.tripwire.app.ui.CasesScreen
+import com.tripwire.app.ui.CheckupScreen
 import com.tripwire.app.ui.HomeScreen
 import com.tripwire.app.ui.LearnScreen
 import com.tripwire.app.ui.Onboarding
@@ -52,6 +53,7 @@ class MainActivity : ComponentActivity() {
                             onPaid = { nav.navigate("paid/") },
                             onSettings = { nav.navigate("settings") },
                             onLearn = { nav.navigate("learn") },
+                            onCheckup = { nav.navigate("checkup") },
                         )
                     }
                     composable("cases") { CasesScreen(vm, onCase = { nav.navigate("case/${Uri.encode(it)}") }, onBack = { nav.popBackStack() }) }
@@ -63,6 +65,7 @@ class MainActivity : ComponentActivity() {
                     composable("settings") {
                         SettingsScreen(vm, onBack = { nav.popBackStack() }, onDeleted = { nav.popBackStack("home", inclusive = false) })
                     }
+                    composable("checkup") { CheckupScreen(vm) { nav.popBackStack() } }
                     composable("learn") { LearnScreen(vm, graph.pack.families) { nav.popBackStack() } }
                 }
 

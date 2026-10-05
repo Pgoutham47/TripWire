@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="demo_access_label">SATFIN Pro Assistant</string>
+    <string name="demo_access_description">Demo only. This does nothing; it lets Tripwire show its warning when an app from a link asks to control the screen.</string>
+</resources>

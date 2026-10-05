@@ -3,7 +3,9 @@ package com.tripwire.app.engine
 import android.util.Log
 import com.tripwire.app.AppGraph
 import com.tripwire.app.intervene.WarningRequest
+import com.tripwire.app.widget.TripwireWidget
 import com.tripwire.core.evidence.AllyAlert
+import com.tripwire.core.model.EventType
 import com.tripwire.core.model.Observation
 import com.tripwire.core.model.TripwireMoment
 import com.tripwire.core.pipeline.IngestResult
@@ -43,7 +45,31 @@ class Guardian(private val graph: AppGraph) {
     private fun handleMoment(obs: Observation) {
         val d = runCatching { pipeline.onMoment(obs) }.onFailure { Log.e(TAG, "moment failed", it) }.getOrNull() ?: return
         debug { "moment ${d.moment} case=${d.caseId != null} show=${d.show} rule=${d.hardRule} risk=${d.risk} in ${d.elapsedMs} ms" }
-        if (d.show) showWarning(d, forwardUri = null)
+        if (d.show) {
+            showWarning(d, forwardUri = null)
+        } else if (obs.type == EventType.COLLECT_REQUEST) {
+            // Not part of a tracked scam, but approving any request still sends money.
+            runCatching { pipeline.collectRequestAlert(obs) }.getOrNull()?.let { graph.notifier.guardAlert(it) }
+        }
+        TripwireWidget.refresh(graph.context)
+    }
+
+    fun fakeCreditFromContact(sender: String) {
+        graph.scope.launch(messageLane) {
+            runCatching { pipeline.fakeCreditFromContact(sender) }.getOrNull()?.let {
+                debug { "guard FAKE_CREDIT (saved contact)" }
+                graph.notifier.guardAlert(it)
+            }
+        }
+    }
+
+    /** OTP guard: a one-time code arrived. Only the fact is passed; the code is never read here. */
+    fun otpArrived() {
+        graph.scope.launch(momentLane) {
+            val alert = runCatching { pipeline.otpArrived() }.onFailure { Log.e(TAG, "otp guard failed", it) }.getOrNull()
+            debug { "otp guard: alert=${alert != null}" }
+            alert?.let { graph.notifier.guardAlert(it) }
+        }
     }
 
     private fun handleMessage(obs: Observation) {
@@ -54,6 +80,11 @@ class Guardian(private val graph: AppGraph) {
             val processed = pipeline.process(stored.eventId)
             debug { "processed: tags=${processed?.tags?.map { it.tactic.wire }} risk=${processed?.state?.risk} stage=${processed?.state?.stage} notice=${processed?.notice != null} in ${processed?.elapsedMs} ms" }
             processed?.notice?.let { graph.notifier.quietNotice(it) }
+            processed?.alert?.let {
+                debug { "guard ${it.kind}" }
+                graph.notifier.guardAlert(it)
+            }
+            TripwireWidget.refresh(graph.context)
             if (obs.type == com.tripwire.core.model.EventType.CALL_STARTED) {
                 pipeline.inCallNoticeFor(stored.caseId, obs)?.takeIf { it.show }?.let {
                     debug { "in-call notice shown, risk=${it.risk}" }

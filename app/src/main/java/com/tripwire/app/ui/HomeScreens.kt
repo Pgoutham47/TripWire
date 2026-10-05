@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.GppBad
+import androidx.compose.material.icons.filled.GppMaybe
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.PauseCircle
@@ -61,7 +62,7 @@ import java.util.Locale
 
 /** UI-01, ONB-07: status at a glance, any protection that is off, active cases, "I already paid". */
 @Composable
-fun HomeScreen(vm: AppViewModel, onCases: () -> Unit, onCase: (String) -> Unit, onPaid: () -> Unit, onSettings: () -> Unit, onLearn: () -> Unit) {
+fun HomeScreen(vm: AppViewModel, onCases: () -> Unit, onCase: (String) -> Unit, onPaid: () -> Unit, onSettings: () -> Unit, onLearn: () -> Unit, onCheckup: () -> Unit) {
     val context = LocalContext.current
     val settings by vm.settings.collectAsState()
     val cases by vm.cases.collectAsState()
@@ -112,6 +113,7 @@ fun HomeScreen(vm: AppViewModel, onCases: () -> Unit, onCase: (String) -> Unit, 
         if (!paidPinned) PaidCard(lang, pinned = false, onPaid)
 
         SectionHeader(Ui.t("home.more", lang))
+        NavRow(Icons.Filled.GppMaybe, Ui.t("checkup.title", lang), Ui.t("checkup.detail", lang), onCheckup)
         NavRow(Icons.AutoMirrored.Filled.MenuBook, Ui.t("btn.learn", lang), Ui.t("learn.detail", lang), onLearn)
         NavRow(Icons.Filled.Settings, Ui.t("btn.settings", lang), Ui.t("settings.detail", lang), onSettings)
     }
@@ -294,7 +296,7 @@ private fun eventIcon(type: EventType): ImageVector = when (type) {
     EventType.CALL_STARTED, EventType.CALL_ENDED -> Icons.Filled.Call
     EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED -> Icons.Filled.InstallMobile
     EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> Icons.Filled.ScreenShare
-    EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED, EventType.PAYMENT_SMS -> Icons.Filled.Payments
+    EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED, EventType.PAYMENT_SMS, EventType.COLLECT_REQUEST -> Icons.Filled.Payments
     else -> Icons.Filled.Info
 }
 

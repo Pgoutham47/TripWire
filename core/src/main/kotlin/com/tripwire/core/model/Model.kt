@@ -65,6 +65,8 @@ enum class EventType(val wire: String) {
     @SerialName("screen_share_started") SCREEN_SHARE_STARTED("screen_share_started"),
     @SerialName("remote_app_opened") REMOTE_APP_OPENED("remote_app_opened"),
     @SerialName("payment_sms") PAYMENT_SMS("payment_sms"),
+    /** A UPI app asking the user to approve a request for money: approving it pays (UPI collect). */
+    @SerialName("collect_request") COLLECT_REQUEST("collect_request"),
     @SerialName("user_reply") USER_REPLY("user_reply");
 
     val signal: String get() = "event:$wire"

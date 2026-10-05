@@ -2,4 +2,6 @@
 <resources>
     <string name="install_screen_label">Tripwire: warn before installing</string>
     <string name="install_screen_description">Tripwire uses this only to see Android\'s app install screen, so it can warn you before an app sent by a scammer is installed. It does not read your messages, passwords or any other app.</string>
+    <string name="widget_label">Tripwire status</string>
+    <string name="widget_description">Protection status, suspicious chats and \"I already paid\".</string>
 </resources>

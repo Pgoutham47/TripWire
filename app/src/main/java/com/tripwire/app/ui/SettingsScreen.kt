@@ -143,7 +143,7 @@ fun SettingsScreen(vm: AppViewModel, onBack: () -> Unit, onDeleted: () -> Unit) 
 private fun relatedTypes(t: EventType): List<EventType> = when (t) {
     EventType.MESSAGE -> listOf(EventType.MESSAGE, EventType.GROUP_ADDED, EventType.USER_REPLY)
     EventType.APP_INSTALLED -> listOf(EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED)
-    EventType.PAYMENT_APP_OPENED -> listOf(EventType.PAYMENT_APP_OPENED, EventType.UPI_LINK_OPENED)
+    EventType.PAYMENT_APP_OPENED -> listOf(EventType.PAYMENT_APP_OPENED, EventType.UPI_LINK_OPENED, EventType.COLLECT_REQUEST)
     EventType.CALL_STARTED -> listOf(EventType.CALL_STARTED, EventType.CALL_ENDED)
     EventType.REMOTE_APP_OPENED -> listOf(EventType.REMOTE_APP_OPENED, EventType.SCREEN_SHARE_STARTED)
     else -> listOf(t)

@@ -3,6 +3,9 @@ package com.tripwire.app.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,12 +20,14 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,6 +49,7 @@ import com.tripwire.core.evidence.Complainant
 import com.tripwire.core.evidence.EvidencePack
 import com.tripwire.core.evidence.TransactionDetails
 import com.tripwire.core.model.Amount
+import com.tripwire.core.script.BankDef
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -67,9 +73,14 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
     var handle by remember { mutableStateOf("") }
     var prefilled by remember { mutableStateOf(false) }
     var built by remember { mutableStateOf<Pair<EvidencePack, File>?>(null) }
+    var bank by remember { mutableStateOf<BankDef?>(null) }
+    var bankFromSms by remember { mutableStateOf(false) }
     var now by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
     LaunchedEffect(caseId) {
+        val found = caseId?.let { vm.bankFor(it) }
+        bankFromSms = found != null
+        if (found != null) bank = found
         val id = caseId ?: return@LaunchedEffect
         vm.prefill(id)?.let { tx ->
             tx.amount?.let { amount = (it.paise / 100).toString() }
@@ -102,6 +113,24 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
             if (left > 0) Text(Ui.t("paid.left_body", lang), style = MaterialTheme.typography.bodyLarge)
             BigButton(Ui.t("btn.call_1930", lang), color = MaterialTheme.colorScheme.error, icon = Icons.Filled.Call) {
                 context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:1930")))
+            }
+        }
+
+        // EVD-03: the bank's own fraud line, read from its website, next to 1930.
+        SectionHeader(Ui.t("paid.bank", lang))
+        InfoCard {
+            val b = bank
+            if (b != null && bankFromSms) {
+                Text(Ui.t("paid.bank_found", lang, "bank" to b.name), style = MaterialTheme.typography.bodyLarge)
+            } else {
+                Text(Ui.t("paid.which_bank", lang), style = MaterialTheme.typography.bodyLarge)
+                BankChips(vm.banks, b) { bank = it; bankFromSms = false }
+            }
+            if (b != null) {
+                BigButton(Ui.t("btn.call_bank", lang, "bank" to b.name, "n" to b.fraudLine), icon = Icons.Filled.Call) {
+                    context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + b.fraudLine.filter(Char::isDigit))))
+                }
+                if (bankFromSms) TextButton(onClick = { bankFromSms = false }) { Text(Ui.t("paid.other_bank", lang)) }
             }
         }
 
@@ -167,6 +196,20 @@ fun PaidScreen(vm: AppViewModel, initialCaseId: String?, onBack: () -> Unit) {
                     Text(Ui.t(key, lang), style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun BankChips(banks: List<BankDef>, selected: BankDef?, onSelect: (BankDef) -> Unit) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        banks.forEach { b ->
+            FilterChip(
+                selected = b.id == selected?.id,
+                onClick = { onSelect(b) },
+                label = { Text(b.name, style = MaterialTheme.typography.labelMedium) },
+            )
         }
     }
 }
