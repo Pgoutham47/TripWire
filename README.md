@@ -37,34 +37,22 @@ Tripwire is one Android app with a five-step pipeline on the phone.
 
 ```mermaid
 flowchart TB
-    subgraph SIG["Signals in"]
-        direction LR
-        A1["WhatsApp, Telegram, SMS"]
-        A2["Calls"]
-        A3["App installs"]
-        A4["UPI links"]
-    end
+    SIG["<b>Signals in</b><br/>WhatsApp, Telegram, SMS, calls, app installs, UPI links"]
 
     subgraph PHONE["On the phone, works offline"]
         direction TB
-        B1["1. Collectors: strangers only, saved contacts skipped"]
-        B2["2. Encrypted ledger: one record per stranger"]
-        B3["3. Tactic reader: AI model or keyword rules"]
-        B4["4. Progression engine: scam family, stage, risk, hard checks"]
-        B5["5. Intervention broker: picks the response"]
+        B1["<b>1. Collectors</b><br/>strangers only, saved contacts skipped"]
+        B2["<b>2. Encrypted ledger</b><br/>one record per stranger"]
+        B3["<b>3. Tactic reader</b><br/>AI model or keyword rules"]
+        B4["<b>4. Progression engine</b><br/>scam family, stage, risk, hard checks"]
+        B5["<b>5. Intervention broker</b><br/>picks the response"]
         B1 --> B2 --> B3 --> B4 --> B5
     end
 
-    subgraph RESP["Response out"]
-        direction LR
-        C1["Quiet notice"]
-        C2["Full-screen warning, spoken"]
-        C3["Guard alerts"]
-        C4["Text to a trusted person"]
-        C5["Complaint pack PDF"]
-    end
+    RESP["<b>Response out</b><br/>quiet notice, full-screen spoken warning, guard alerts,<br/>text to a trusted person, complaint pack PDF"]
 
-    SIG --> PHONE --> RESP
+    SIG --> B1
+    B5 --> RESP
 ```
 
 ### The six stages
