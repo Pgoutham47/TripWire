@@ -354,7 +354,7 @@ private fun WarningScreen(
                 ) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(Ui.t("warning.what_happened", lang), style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
-                        val fmt = SimpleDateFormat("d MMM, h:mm a", Locale.getDefault())
+                        val fmt = warningDateFormat(lang)
                         w.timeline.forEach { item ->
                             val time = fmt.format(Date(item.time))
                             val app = appLabel(item.app)
@@ -566,6 +566,16 @@ private fun FeedbackScreen(lang: String, onAnswer: (Feedback?) -> Unit) {
             TextButton(onClick = { onAnswer(null) }, modifier = Modifier.heightIn(min = 56.dp)) { Text(Ui.t("btn.skip", lang), style = MaterialTheme.typography.labelLarge) }
         }
     }
+}
+
+/**
+ * Timeline dates in the warning's own language, so a Hindi warning on an English phone has no
+ * English month names (PRD 13.4). The phone's own format is kept when its language matches.
+ */
+internal fun warningDateFormat(lang: String, device: Locale = Locale.getDefault()): SimpleDateFormat {
+    val base = lang.substringBefore('-')
+    val locale = if (device.language == base) device else Locale.forLanguageTag(if ('-' in lang) lang else "$base-IN")
+    return SimpleDateFormat("d MMM, h:mm a", locale)
 }
 
 private val knownApps = mapOf(
