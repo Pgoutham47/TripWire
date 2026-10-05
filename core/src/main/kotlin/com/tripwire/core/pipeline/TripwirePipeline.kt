@@ -141,10 +141,11 @@ class TripwirePipeline(
             Entities(phoneNumbers = listOfNotNull(obs.senderPhone?.let { EntityExtractor.normalizePhone(it) }))
         val cp = resolveCounterparty(obs, entities) ?: return IngestResult.Ignored("trusted")
         // Messaging apps repeat earlier messages in each new notification, and an app restart
-        // forgets what was seen. The ledger is the memory: an identical message from the same
-        // counterparty within a day is the same message.
+        // forgets what was seen. The ledger is the memory: identical text from the same
+        // counterparty with the same send time is the same message. The same text sent again
+        // later is a new message, since scammers repeat their demands.
         if (obs.type == EventType.MESSAGE && obs.text != null &&
-            store.eventsFor(listOf(cp.id)).any { it.type == EventType.MESSAGE && it.text == obs.text && kotlin.math.abs(it.timestamp - obs.timestamp) < DAY_MS }
+            store.eventsFor(listOf(cp.id)).any { it.type == EventType.MESSAGE && it.text == obs.text && kotlin.math.abs(it.timestamp - obs.timestamp) < SAME_MESSAGE_MS }
         ) {
             return IngestResult.Ignored("duplicate")
         }
@@ -691,6 +692,7 @@ class TripwirePipeline(
         const val HOUR_MS = 60L * 60 * 1000
         const val DAY_MS = 24 * HOUR_MS
         const val DEDUPE_MS = 10 * 60 * 1000L
+        const val SAME_MESSAGE_MS = 2_000L
         const val INSTALL_DEDUPE_MS = 60 * 1000L
         const val LONG_CALL_MS = 15 * 60 * 1000L
         const val CASE_LIFETIME_MS = 90 * DAY_MS

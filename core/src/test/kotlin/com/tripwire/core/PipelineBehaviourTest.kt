@@ -239,12 +239,36 @@ class PipelineBehaviourTest {
 
     @Test
     fun `a repeated message is stored once, even across restarts`() {
-        val first = pipeline.onObservation(msg("Update KYC today: install our app", "+919000000096"))
+        val repost = msg("Update KYC today: install our app", "+919000000096")
+        val first = pipeline.onObservation(repost)
         assertNotNull(first.eventId)
         now += 4 * 60_000
-        // A fresh pipeline on the same ledger, as after an app restart.
+        // A fresh pipeline on the same ledger, as after an app restart. The re-posted message
+        // keeps the time it was sent.
         val restarted = TripwirePipeline(pack, store, null, { config }, { now })
-        assertEquals("duplicate", restarted.onObservation(msg("Update KYC today: install our app", "+919000000096")).ignored)
+        assertEquals("duplicate", restarted.onObservation(repost).ignored)
         assertEquals(1, store.eventsFor(listOf("tel:+919000000096")).size)
+    }
+
+    @Test
+    fun `the same text sent again later is a new message`() {
+        assertNotNull(pipeline.onObservation(msg("Your account will be blocked today, share your screen on AnyDesk", "+919000000095")).eventId)
+        now += 40_000
+        assertNotNull(pipeline.onObservation(msg("Your account will be blocked today, share your screen on AnyDesk", "+919000000095")).eventId)
+        assertEquals(2, store.eventsFor(listOf("tel:+919000000095")).size)
+    }
+
+    @Test
+    fun `a resent scam message joins the same case without a second notice`() {
+        val text = "Sir I am calling from SBI KYC department, your account will be blocked today, share your screen on AnyDesk to verify"
+        val first = pipeline.onObservation(msg(text, "+919000000094"))
+        assertNotNull(first.processed?.notice)
+        repeat(3) {
+            now += 40_000
+            val again = pipeline.onObservation(msg(text, "+919000000094"))
+            assertEquals(first.caseId, again.caseId)
+            assertNull(again.processed?.notice)
+        }
+        assertEquals(4, store.eventsFor(listOf("tel:+919000000094")).size)
     }
 }

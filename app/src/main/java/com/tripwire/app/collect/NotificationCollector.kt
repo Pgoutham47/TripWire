@@ -43,17 +43,28 @@ class NotificationCollector : NotificationListenerService() {
             return
         }
         if (pack.apps.messaging.none { it.packageName == pkg }) return
+        // "Missed voice call" is not a message; the ringing call was already recorded above (SIG-12).
+        if (n.category == CATEGORY_MISSED_CALL) return
         if (n.flags and Notification.FLAG_GROUP_SUMMARY != 0) return
+        // The app's own status notices ("Checking for new messages", "WhatsApp Web is active")
+        // are ongoing; a chat message never is. Calls were handled above.
+        if (n.flags and (Notification.FLAG_ONGOING_EVENT or Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+            Guardian.debug { "notification skipped: $pkg status notice" }
+            return
+        }
 
         val extras = n.extras ?: return
         val messages = latestMessages(extras)
         Guardian.debug { "notification from $pkg: style=${extras.getString(Notification.EXTRA_TEMPLATE)?.substringAfterLast('$')} messages=${messages.size} group=${extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION)}" }
+        // Each message keeps the time it was sent, so a re-post of an old message can be told apart
+        // from the same text sent again (a scammer repeating a demand is a new message).
+        val postedAt = n.`when`.takeIf { it > 0 } ?: sbn.postTime
         val raws = if (messages.isNotEmpty()) {
-            messages.map { (sender, text) -> raw(pkg, extras, text, sender, false) }
+            messages.map { m -> raw(pkg, extras, m.text, m.sender, false) to m.time }
         } else {
-            listOf(raw(pkg, extras, extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(), null, false))
+            listOf(raw(pkg, extras, extras.getCharSequence(Notification.EXTRA_TEXT)?.toString(), null, false) to postedAt)
         }
-        for (raw in raws) {
+        for ((raw, sentAt) in raws) {
             val parsed = NotificationParser.parse(raw)
             // Android 15+ redacts notifications it classes as sensitive for untrusted listeners
             // (PRD 15.3). The placeholder carries no sender or text, so it is dropped, not stored.
@@ -66,10 +77,13 @@ class NotificationCollector : NotificationListenerService() {
                 Guardian.debug { "notification not parsed" }
                 continue
             }
-            val key = "$pkg|${parsed.groupName}|${parsed.senderName}|${parsed.text}"
-            if (seen.put(key, Unit) != null) continue // the same message re-posted with the next one
+            val key = "$pkg|${parsed.groupName}|${parsed.senderName}|${parsed.text}|$sentAt"
+            if (seen.put(key, Unit) != null) {
+                Guardian.debug { "notification skipped: message already seen" }
+                continue // the same message re-posted with the next one
+            }
 
-            val now = System.currentTimeMillis()
+            val now = sentAt.coerceAtMost(System.currentTimeMillis())
             // Payment confirmations from bank short codes feed the evidence pack (SIG-14).
             if (isSmsApp(pkg) && PaymentSmsParser.parse(parsed.text, now) != null) {
                 graph.guardian.submit(
@@ -153,10 +167,11 @@ class NotificationCollector : NotificationListenerService() {
      * MessagingStyle notifications repeat the thread's recent history. Only messages from the last
      * few minutes are new; older ones were seen before, or arrived while Tripwire was not running.
      */
-    private fun latestMessages(extras: Bundle): List<Pair<String?, String>> {
+    private fun latestMessages(extras: Bundle): List<StyledMessage> {
         @Suppress("DEPRECATION")
         val arr: Array<Parcelable> = extras.getParcelableArray(Notification.EXTRA_MESSAGES) ?: return emptyList()
-        val cutoff = System.currentTimeMillis() - FRESH_MS
+        val now = System.currentTimeMillis()
+        val cutoff = now - FRESH_MS
         return arr.takeLast(3).mapNotNull { p ->
             val b = p as? Bundle ?: return@mapNotNull null
             val time = b.getLong("time", 0L)
@@ -165,9 +180,11 @@ class NotificationCollector : NotificationListenerService() {
             @Suppress("DEPRECATION")
             val person = b.getParcelable<android.app.Person>("sender_person")
             val sender = person?.name?.toString() ?: b.getCharSequence("sender")?.toString()
-            sender to text
+            StyledMessage(sender, text, if (time > 0) time else now)
         }
     }
+
+    private data class StyledMessage(val sender: String?, val text: String, val time: Long)
 
     companion object {
         @Volatile var connected = false
@@ -179,6 +196,8 @@ class NotificationCollector : NotificationListenerService() {
 
         private val REDACTED = setOf("Sensitive notification content hidden", "संवेदनशील सूचना की सामग्री छिपाई गई")
 
+        /** Notification.CATEGORY_MISSED_CALL, added in API 30; the value is stable. */
+        private const val CATEGORY_MISSED_CALL = "missed_call"
         private const val FRESH_MS = 5 * 60_000L
         private val CALL_TEXT = Regex("(?i)(ongoing|incoming|calling|voice call|video call|कॉल)")
         private val VIDEO = Regex("(?i)(video|वीडियो)")
