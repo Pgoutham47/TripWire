@@ -36,8 +36,9 @@ The research and market case is in [Tripwire.md](Tripwire.md). The full product 
 Tripwire is one Android app with a five-step pipeline on the phone.
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph SIG["Signals in"]
+        direction LR
         A1["WhatsApp, Telegram, SMS"]
         A2["Calls"]
         A3["App installs"]
@@ -46,13 +47,16 @@ flowchart LR
 
     subgraph PHONE["On the phone, works offline"]
         direction TB
-        B1["1. Collectors<br/>strangers only"] --> B2["2. Encrypted ledger<br/>one record per stranger"]
-        B2 --> B3["3. Tactic reader<br/>AI model or keyword rules"]
-        B3 --> B4["4. Progression engine<br/>family, stage, risk, hard checks"]
-        B4 --> B5["5. Intervention broker"]
+        B1["1. Collectors: strangers only, saved contacts skipped"]
+        B2["2. Encrypted ledger: one record per stranger"]
+        B3["3. Tactic reader: AI model or keyword rules"]
+        B4["4. Progression engine: scam family, stage, risk, hard checks"]
+        B5["5. Intervention broker: picks the response"]
+        B1 --> B2 --> B3 --> B4 --> B5
     end
 
     subgraph RESP["Response out"]
+        direction LR
         C1["Quiet notice"]
         C2["Full-screen warning, spoken"]
         C3["Guard alerts"]
@@ -60,15 +64,7 @@ flowchart LR
         C5["Complaint pack PDF"]
     end
 
-    A1 --> B1
-    A2 --> B1
-    A3 --> B1
-    A4 --> B1
-    B5 --> C1
-    B5 --> C2
-    B5 --> C3
-    B5 --> C4
-    B5 --> C5
+    SIG --> PHONE --> RESP
 ```
 
 ### The six stages
