@@ -1601,6 +1601,10 @@
    "en": "Payment to {handle}",
    "hi": "{handle} को भुगतान"
   },
+  "timeline.payment_started": {
+   "en": "Started a payment",
+   "hi": "भुगतान शुरू किया"
+  },
   "timeline.collect_request": {
    "en": "Asked you to approve a payment request",
    "hi": "भुगतान का अनुरोध मंज़ूर करने को कहा"

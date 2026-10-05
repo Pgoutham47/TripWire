@@ -188,8 +188,11 @@ class ExplanationBuilder(private val pack: ScriptPack) {
                 EventType.GROUP_ADDED -> string("timeline.group_added", lang, mapOf("group" to (e.groupName ?: ""))) to true
                 EventType.APP_INSTALLED, EventType.INSTALL_SCREEN_OPENED ->
                     string(if (e.type == EventType.APP_INSTALLED) "timeline.app_installed" else "timeline.install_screen", lang, mapOf("app" to (e.installedLabel ?: e.installedPackage ?: ""))) to true
-                EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED ->
-                    string("timeline.payment", lang, mapOf("handle" to (e.upi?.payeeHandle ?: ""))) to true
+                EventType.UPI_LINK_OPENED, EventType.PAYMENT_APP_OPENED -> {
+                    // A payment app opening has no payee yet; the row already names the app.
+                    val handle = e.upi?.payeeHandle?.takeIf { it.isNotBlank() }
+                    (if (handle != null) string("timeline.payment", lang, mapOf("handle" to handle)) else string("timeline.payment_started", lang)) to true
+                }
                 EventType.CALL_STARTED -> string(if (e.isVideoCall) "timeline.video_call" else "timeline.call", lang) to true
                 EventType.SCREEN_SHARE_STARTED, EventType.REMOTE_APP_OPENED -> string("timeline.screen_share", lang) to true
                 EventType.PAYMENT_SMS -> string("timeline.paid", lang) to true

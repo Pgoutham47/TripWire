@@ -3,7 +3,12 @@ package com.tripwire.core
 import com.tripwire.core.checks.CheckOutcome
 import com.tripwire.core.checks.GroundedChecks
 import com.tripwire.core.entity.EntityExtractor
+import com.tripwire.core.explain.ExplanationBuilder
 import com.tripwire.core.model.Amount
+import com.tripwire.core.model.Entities
+import com.tripwire.core.model.Event
+import com.tripwire.core.model.EventType
+import com.tripwire.core.model.UpiPayment
 import com.tripwire.core.model.Tactic
 import com.tripwire.core.parse.NotificationParser
 import com.tripwire.core.parse.PaymentSmsParser
@@ -221,6 +226,19 @@ class ComponentTest {
         val missing = (pack.strings + pack.reasons).flatMap { (k, v) -> langs.filter { v[it].isNullOrBlank() }.map { "$k:$it" } }
         assertTrue(missing.isEmpty(), "missing $missing")
         pack.families.forEach { f -> langs.forEach { assertNotNull(f.names[it], "${f.id} name $it") } }
+    }
+
+    @Test
+    fun `a payment app opening is on the timeline without an empty payee`() {
+        val explain = ExplanationBuilder(pack)
+        fun event(id: Long, type: EventType, upi: UpiPayment? = null) =
+            Event(id, "c", "com.google.android.apps.nbu.paisa.user", type, null, Entities(), id * 1000, "test", upi = upi)
+        val labels = explain.timeline(
+            listOf(event(1, EventType.PAYMENT_APP_OPENED), event(2, EventType.UPI_LINK_OPENED, UpiPayment("satfin@ybl"))),
+            emptyMap(),
+            "en",
+        ).map { it.label }
+        assertEquals(listOf("Started a payment", "Payment to satfin@ybl"), labels)
     }
 
     @Test
