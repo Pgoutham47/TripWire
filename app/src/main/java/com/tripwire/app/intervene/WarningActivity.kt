@@ -53,6 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -108,40 +109,43 @@ data class WarningRequest(
  * three-second hold (INT-05). Every choice is logged, then the user is asked "Was this a scam?" (FBK-01).
  */
 class WarningActivity : ComponentActivity() {
-    private lateinit var req: WarningRequest
+    /** The warning on screen. Compose state, so a newer warning can replace it (see [onNewIntent]). */
+    private var req by mutableStateOf<WarningRequest?>(null)
+    private var stage by mutableStateOf(Phase.Warning)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        req = ScriptPack.json.decodeFromString(WarningRequest.serializer(), intent.getStringExtra(EXTRA)!!)
         if (Build.VERSION.SDK_INT >= 31) window.setHideOverlayWindows(true) // no other app may cover the warning (PRD 15.4)
         setShowWhenLocked(true)
         setTurnScreenOn(true)
         val graph = applicationContext.graph
-        graph.notifier.cancelWarning()
-        val lang = req.warning.language
-        if (graph.settings.current.speechOn) graph.speaker.speak(req.warning.spoken, lang)
+        present(decode(intent) ?: return finish())
 
         setContent {
             TripwireTheme {
-                var stage by remember { mutableStateOf(Phase.Warning) }
-                BackHandler { choose(UserChoice.STOPPED) { stage = it } }
-                when (stage) {
-                    Phase.Warning -> WarningScreen(
-                        w = req.warning,
-                        allyPhone = allyPhone,
-                        onPrimary = { choose(UserChoice.STOPPED) { stage = it } },
-                        onAlly = { choose(UserChoice.CALLED_ALLY) { stage = it } },
-                        onVerify = { choose(UserChoice.VERIFIED) { stage = it } },
-                        onProceed = { choose(UserChoice.PROCEEDED) { stage = it } },
-                        onTrusted = { choose(UserChoice.MARKED_TRUSTED) { stage = it } },
-                        onPaid = {
-                            startActivity(Intent(this, MainActivity::class.java).putExtra(MainActivity.EXTRA_PAID_CASE, req.caseId))
-                            finish()
-                        },
-                        onReplay = { graph.speaker.speak(req.warning.spoken, lang) },
-                    )
-                    Phase.Feedback -> FeedbackScreen(lang) { fb -> feedback(fb) }
-                    Phase.Done -> LaunchedEffect(Unit) { finish() }
+                val r = req ?: return@TripwireTheme
+                val lang = r.warning.language
+                BackHandler { choose(r, UserChoice.STOPPED) }
+                // A new warning restarts the screen from the top, not mid-scroll in the old one.
+                key(r.interventionId) {
+                    when (stage) {
+                        Phase.Warning -> WarningScreen(
+                            w = r.warning,
+                            allyPhone = allyPhone,
+                            onPrimary = { choose(r, UserChoice.STOPPED) },
+                            onAlly = { choose(r, UserChoice.CALLED_ALLY) },
+                            onVerify = { choose(r, UserChoice.VERIFIED) },
+                            onProceed = { choose(r, UserChoice.PROCEEDED) },
+                            onTrusted = { choose(r, UserChoice.MARKED_TRUSTED) },
+                            onPaid = {
+                                startActivity(Intent(this, MainActivity::class.java).putExtra(MainActivity.EXTRA_PAID_CASE, r.caseId))
+                                finish()
+                            },
+                            onReplay = { graph.speaker.speak(r.warning.spoken, lang) },
+                        )
+                        Phase.Feedback -> FeedbackScreen(lang) { fb -> feedback(r, fb) }
+                        Phase.Done -> LaunchedEffect(Unit) { finish() }
+                    }
                 }
             }
         }
@@ -153,6 +157,41 @@ class WarningActivity : ComponentActivity() {
     /** Compose state, so the ally button appears as soon as the number has loaded. */
     private var allyPhone by mutableStateOf<String?>(null)
 
+    /**
+     * A second warning while one is on screen (the activity is singleTop): the newest is what the
+     * person is about to do, so it replaces the old one. A warning left unanswered is recorded as
+     * dismissed, so the audit trail shows it was seen but not chosen on (ENG-04).
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val next = decode(intent) ?: return
+        val old = req
+        if (old != null && old.interventionId == next.interventionId && !old.sample) return
+        setIntent(intent)
+        com.tripwire.app.engine.Guardian.debug { "warning ${old?.warning?.moment} replaced by ${next.warning.moment} (old answered=${stage != Phase.Warning})" }
+        if (old != null && !old.sample && stage == Phase.Warning) {
+            val graph = applicationContext.graph
+            graph.scope.launch(Dispatchers.IO) {
+                graph.pipeline.recordChoice(old.interventionId, UserChoice.DISMISSED)
+                com.tripwire.app.engine.Guardian.debug { "choice DISMISSED on ${old.warning.moment} warning ${old.interventionId}" }
+            }
+        }
+        present(next)
+    }
+
+    private fun decode(intent: Intent?): WarningRequest? =
+        intent?.getStringExtra(EXTRA)?.let { runCatching { ScriptPack.json.decodeFromString(WarningRequest.serializer(), it) }.getOrNull() }
+
+    /** Shows [r] from the top: clears its notification and reads it aloud. */
+    private fun present(r: WarningRequest) {
+        val graph = applicationContext.graph
+        req = r
+        stage = Phase.Warning
+        graph.notifier.cancelWarning()
+        graph.speaker.stop()
+        if (graph.settings.current.speechOn) graph.speaker.speak(r.warning.spoken, r.warning.language)
+    }
+
     override fun onDestroy() {
         applicationContext.graph.speaker.stop()
         super.onDestroy()
@@ -160,33 +199,36 @@ class WarningActivity : ComponentActivity() {
 
     private enum class Phase { Warning, Feedback, Done }
 
-    private fun choose(choice: UserChoice, next: (Phase) -> Unit) {
+    /** Records [choice] against [r], the warning it was made on, even if a newer one has since arrived. */
+    private fun choose(r: WarningRequest, choice: UserChoice) {
         val graph = applicationContext.graph
         graph.speaker.stop()
-        if (req.sample) {
-            next(Phase.Done)
+        if (r.sample) {
+            if (req === r) stage = Phase.Done
             return
         }
         lifecycleScope.launch {
-            val effect = withContext(Dispatchers.IO) { graph.pipeline.recordChoice(req.interventionId, choice) }
+            val effect = withContext(Dispatchers.IO) { graph.pipeline.recordChoice(r.interventionId, choice) }
+            com.tripwire.app.engine.Guardian.debug { "choice $choice on ${r.warning.moment} warning ${r.interventionId}" }
             when (choice) {
-                UserChoice.STOPPED -> stopAction()
+                UserChoice.STOPPED -> stopAction(r)
                 UserChoice.CALLED_ALLY -> allyPhone?.let { startActivity(graph.allies.dialIntent(it)) }
                 UserChoice.VERIFIED -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(graph.pack.sebiCheckUrl)))
                 UserChoice.PROCEEDED -> {
-                    if (effect.alertAlly) graph.guardian.alertAlly(req.caseId, AllyAlert.Kind.PROCEEDED)
+                    if (effect.alertAlly) graph.guardian.alertAlly(r.caseId, AllyAlert.Kind.PROCEEDED)
                     effect.pinPaidShortcutUntil?.let { until -> graph.settings.update { it.copy(paidShortcutUntil = until) } }
-                    effect.checkInAt?.let { Workers.scheduleCheckIn(this@WarningActivity, req.caseId, it) }
-                    req.forwardUri?.let { UpiLinkActivity.forward(this@WarningActivity, Uri.parse(it)) }
+                    effect.checkInAt?.let { Workers.scheduleCheckIn(this@WarningActivity, r.caseId, it) }
+                    r.forwardUri?.let { UpiLinkActivity.forward(this@WarningActivity, Uri.parse(it)) }
                 }
                 else -> Unit
             }
-            next(if (choice == UserChoice.MARKED_TRUSTED) Phase.Done else Phase.Feedback)
+            // Only move on if this warning is still the one on screen.
+            if (req === r) stage = if (choice == UserChoice.MARKED_TRUSTED) Phase.Done else Phase.Feedback
         }
     }
 
     /** What "Don't pay / Don't install / Stop" does for each moment. */
-    private fun stopAction() {
+    private fun stopAction(req: WarningRequest) {
         when (req.warning.moment) {
             TripwireMoment.INSTALL -> {
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -216,11 +258,11 @@ class WarningActivity : ComponentActivity() {
         startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    private fun feedback(fb: Feedback?) {
+    private fun feedback(r: WarningRequest, fb: Feedback?) {
         val graph = applicationContext.graph
         if (fb != null) {
             graph.scope.launch(Dispatchers.IO) {
-                val next = graph.pipeline.recordFeedback(req.interventionId, fb, graph.settings.current.offsets)
+                val next = graph.pipeline.recordFeedback(r.interventionId, fb, graph.settings.current.offsets)
                 graph.settings.update { it.copy(watchOffset = next.watch, warnOffset = next.warn) }
             }
         }
